@@ -42,6 +42,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     ee_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
+        # obstacle: will be populated by agent env cfg
+    # obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -124,6 +126,61 @@ class ObservationsCfg:
 class EventCfg:
     """Configuration for events."""
 
+        # domain randomization
+    # robot_physics_material = EventTerm(
+    #     func=mdp.randomize_rigid_body_material,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "static_friction_range": (0.7, 1.3),
+    #         "dynamic_friction_range": (0.7, 1.3),
+    #         "restitution_range": (0.0, 0.0),
+    #         "num_buckets": 250,
+    #     },
+    # )
+    # robot_scale_mass = EventTerm(
+    #     func=mdp.randomize_rigid_body_mass,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "mass_distribution_params": (0.95, 1.05),
+    #         "operation": "scale",
+    #     },
+    # )
+    # robot_joint_stiffness_and_damping = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
+    #         "stiffness_distribution_params": (0.3, 3.0),  # default: 3.0
+    #         "damping_distribution_params": (0.75, 1.5),  # default: 0.1
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
+
+    # -- object
+    # object_physics_material = EventTerm(
+    #     func=mdp.randomize_rigid_body_material,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("object", body_names=".*"),
+    #         "static_friction_range": (0.7, 1.3),
+    #         "dynamic_friction_range": (0.7, 1.3),
+    #         "restitution_range": (0.0, 0.0),
+    #         "num_buckets": 250,
+    #     },
+    # )
+    # object_scale_mass = EventTerm(
+    #     func=mdp.randomize_rigid_body_mass,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("object"),
+    #         "mass_distribution_params": (0.4, 1.6),
+    #         "operation": "scale",
+    #     },
+    # )
+
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
     reset_object_position = EventTerm(
@@ -141,30 +198,64 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
+    # previously weight 0.4
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.02}, weight=15.0)
+    # increased lifing reward
+    # best result: no reach, lift weight 15, dt 0.01, 5.sec
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.03}, weight=15.0)
 
+    # sd 0.3
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.02, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.03, "command_name": "object_pose"},
         weight=16.0,
     )
 
+    # sd 0.05
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.02, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.03, "command_name": "object_pose"},
         weight=5.0,
     )
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
+    # penalized agent for taking large actions. encourages to take small controlled actions
+    #action_l2 = RewTerm(func=mdp.action_l2, weight=-0.001)
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
+
+    # align_ee_handle = RewTerm(func=mdp.align_ee_handle, weight=0.5)
+
+    # object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
+
+    # joint_deviation_hip = RewTerm(
+    #     func=mdp.joint_deviation_l1,
+    #     weight=-0.01,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
+    # )
+
+    # grasp_needle = RewTerm(
+    #     func=mdp.grasp_needle,
+    #     weight=5.0,
+    #     params={
+    #         "threshold": 0.01,
+    #         "open_joint_pos1": MISSING,
+    #         "open_joint_pos2": MISSING,
+    #         "asset_cfg1": SceneEntityCfg("robot", joint_names=["psm_tool_gripper1_joint"]),
+    #         "asset_cfg2": SceneEntityCfg("robot", joint_names=["psm_tool_gripper2_joint"]),
+    #     },
+    # )
+    # undesired_contacts = RewTerm(
+    #     func=mdp.undesired_obstacle_contacts,
+    #     weight=-1.0,
+    #     params={"sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 1.0},
+    # )
 
 
 @configclass
@@ -189,6 +280,21 @@ class CurriculumCfg:
     joint_vel = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
+
+    # action_rate2 = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -2, "num_steps": 20000}
+    # )
+    # grasp_needle = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
+    # )
+
+    # joint_vel2 = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -2, "num_steps": 20000}
+    # )
+
+    # object_moving = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 30000}
+    # )
 
 
 ##

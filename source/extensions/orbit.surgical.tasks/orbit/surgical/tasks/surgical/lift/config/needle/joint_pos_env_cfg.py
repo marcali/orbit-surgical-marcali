@@ -43,6 +43,14 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
                 "psm_tool_yaw_joint",
             ],
             scale=0.5,
+                        # scale={
+            #     "psm_yaw_joint": 0.5,
+            #     "psm_pitch_end_joint": 0.2,
+            #     "psm_main_insertion_joint": 0.3,
+            #     "psm_tool_roll_joint": 0.1,
+            #     "psm_tool_pitch_joint": 0.1,
+            #     "psm_tool_yaw_joint": 0.5,
+            # },
             use_default_offset=True,
         )
         self.actions.finger_joint_pos = mdp.BinaryJointPositionActionCfg(
@@ -72,6 +80,28 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
             ),
         )
 
+                # Rigid Object cone obstacle
+        # self.scene.obstacle = RigidObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/Obstacle",
+        #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.05, 0.0, 0.015), rot=(1, 0, 0, 0)),
+        #     # contact_pose=torch.tensor([-1.0, 0.0, 0.0, 1, 0, 0, 0]),
+        #     # non_contact_pose=torch.tensor([-1.0, 0.0, 1.0, 1, 0, 0, 0]),
+        #     spawn=sim_utils.ConeCfg(
+        #         radius=0.05,
+        #         height=0.1,
+        #         rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        #             disable_gravity=False,
+        #         ),
+        #         mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
+        #         collision_props=sim_utils.CollisionPropertiesCfg(
+        #             collision_enabled=True,
+        #             #contact_offset=0.05,
+        #         ),
+        #         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0), metallic=0.2),
+        #         #activate_contact_sensors=True,
+        #     ),
+        # )
+
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
         marker_cfg.markers["frame"].scale = (0.02, 0.02, 0.02)
@@ -87,6 +117,11 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
                 ),
             ],
         )
+
+
+        # override rewards
+        # self.rewards.grasp_needle.params["open_joint_pos1"] = 0.04
+        # self.rewards.grasp_needle.params["open_joint_pos2"] = -0.04
 
 
 @configclass

@@ -11,6 +11,7 @@ from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import Offse
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from omni.isaac.lab.utils import configclass
+from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from orbit.surgical.tasks.surgical.handover import mdp
 from orbit.surgical.tasks.surgical.handover.handover_env_cfg import HandoverEnvCfg
@@ -30,10 +31,10 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
 
         # Set PSM as robot
         self.scene.robot_1 = PSM_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot_1")
-        self.scene.robot_1.init_state.pos = (0.2, 0.0, 0.15)
+        self.scene.robot_1.init_state.pos = (0.1, 0.0, 0.15)
         self.scene.robot_1.init_state.rot = (1.0, 0.0, 0.0, 0.0)
         self.scene.robot_2 = PSM_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot_2")
-        self.scene.robot_2.init_state.pos = (-0.2, 0.0, 0.15)
+        self.scene.robot_2.init_state.pos = (-0.1, 0.0, 0.15)
         self.scene.robot_2.init_state.rot = (1.0, 0.0, 0.0, 0.0)
 
         # Set actions for the specific robot type (PSM)
@@ -76,13 +77,13 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
             close_command_expr={"psm_tool_gripper1_joint": -0.09, "psm_tool_gripper2_joint": 0.09},
         )
         # Set the body name for the end effector
-        self.commands.ee_1_pose.body_name = "psm_tool_tip_link"
-        self.commands.ee_2_pose.body_name = "psm_tool_tip_link"
+        self.commands.object_pose_1.body_name = "psm_tool_tip_link"
+        self.commands.object_pose_2.body_name = "psm_tool_tip_link"
 
         # Set Suture Needle as object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=(-0.2, 0.0, 0.05), rot=(1, 0, 0, 0)),
+            init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(1, 0, 0, 0)),
             spawn=UsdFileCfg(
                 usd_path=f"{ORBITSURGICAL_ASSETS_DATA_DIR}/Props/Surgical_needle/needle_sdf.usd",
                 scale=(0.4, 0.4, 0.4),
@@ -96,6 +97,24 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 ),
             ),
         )
+        
+        #Set an obstacle
+        # self.scene.obstacle = RigidObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/Obstacle",
+        #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.1, 0.0, 0.05), rot=(1, 0, 0, 0)),
+        #     spawn=UsdFileCfg(
+        #         usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+        #         scale=(1.0, 1.0, 1.0),
+        #         rigid_props=RigidBodyPropertiesCfg(
+        #             solver_position_iteration_count=16,
+        #             solver_velocity_iteration_count=16,
+        #             max_angular_velocity=0.1,
+        #             max_linear_velocity=0.1,
+        #             max_depenetration_velocity=1.0,
+        #             disable_gravity=False,
+        #         ),
+        #     ),
+        # )
 
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()

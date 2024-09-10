@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+
 from dataclasses import MISSING
 
 from orbit.surgical.assets import ORBITSURGICAL_ASSETS_DATA_DIR
@@ -44,6 +45,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     ee_2_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
+    # obstacle: will be populated by agent env cfg
+    #obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -75,7 +78,11 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    ee_1_pose = mdp.UniformPoseCommandCfg(
+    # ee_1_pose: mdp.UniformPoseCommandCfg = MISSING
+
+    # ee_2_pose: mdp.UniformPoseCommandCfg = MISSING
+
+    object_pose_1 = mdp.UniformPoseCommandCfg(
         asset_name="robot_1",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
@@ -84,12 +91,13 @@ class CommandsCfg:
             pos_x=(-0.05, 0.05),
             pos_y=(-0.05, 0.05),
             pos_z=(-0.12, -0.08),
-            roll=(0.0, 0.0),
+            roll=(3.14, 3.14),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
         ),
     )
-    ee_2_pose = mdp.UniformPoseCommandCfg(
+
+    object_pose_2 = mdp.UniformPoseCommandCfg(
         asset_name="robot_2",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
@@ -98,7 +106,7 @@ class CommandsCfg:
             pos_x=(-0.05, 0.05),
             pos_y=(-0.05, 0.05),
             pos_z=(-0.12, -0.08),
-            roll=(0.0, 0.0),
+            roll=(3.14, 3.14),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
         ),
@@ -109,9 +117,16 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
+    # arm_1_action: ActionTerm = MISSING
+    # gripper_1_action: ActionTerm | None = None
+
+    # arm_2_action: ActionTerm = MISSING
+    # gripper_2_action: ActionTerm | None = None
+
     # will be set by agent env cfg
     body_1_joint_pos: mdp.JointPositionActionCfg = MISSING
     finger_1_joint_pos: mdp.BinaryJointPositionActionCfg = MISSING
+
     body_2_joint_pos: mdp.JointPositionActionCfg = MISSING
     finger_2_joint_pos: mdp.BinaryJointPositionActionCfg = MISSING
 
@@ -124,8 +139,37 @@ class ObservationsCfg:
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-        # TODO
-
+        # observation terms (order preserved)
+        joint_1_pos = ObsTerm(
+            func=mdp.joint_pos_rel,
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
+            params={"asset_cfg": SceneEntityCfg("robot_1")},
+        )
+        joint_1_vel = ObsTerm(
+            func=mdp.joint_vel_rel,
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
+            params={"asset_cfg": SceneEntityCfg("robot_1")},
+        )
+        joint_2_pos = ObsTerm(
+            func=mdp.joint_pos_rel,
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
+            params={"asset_cfg": SceneEntityCfg("robot_2")},
+        )
+        joint_2_vel = ObsTerm(
+            func=mdp.joint_vel_rel,
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
+            params={"asset_cfg": SceneEntityCfg("robot_2")},
+        )
+        # pose_1_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_1_pose"})
+        # pose_2_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_2_pose"})
+        object_position_1 = ObsTerm(
+            func=mdp.object_position_in_robot_root_frame, params={"robot_cfg": SceneEntityCfg("robot_1")}
+        )
+        object_position_2 = ObsTerm(
+            func=mdp.object_position_in_robot_root_frame, params={"robot_cfg": SceneEntityCfg("robot_2")}
+        )
+        target_object_position_1 = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose_1"})
+        target_object_position_2 = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose_2"})
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -140,13 +184,17 @@ class ObservationsCfg:
 class EventCfg:
     """Configuration for events."""
 
+    # reset_robot_1_joints: EventTerm = MISSING
+
+    # reset_robot_2_joints: EventTerm = MISSING
+
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
     reset_object_position = EventTerm(
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.05, 0.05), "y": (-0.05, 0.05), "z": (-0.1, -0.1)},
+            "pose_range": {"x": (-0.05, 0.05), "y": (-0.05, 0.05), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -157,10 +205,152 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    # TODO
+    # task terms
+    # end_effector_1_position_tracking = RewTerm(
+    #     func=mdp.position_command_error,
+    #     weight=-0.2,
+    #     params={"asset_cfg": SceneEntityCfg("robot_1", body_names=MISSING), "command_name": "ee_1_pose"},
+    # )
+    # end_effector_1_orientation_tracking = RewTerm(
+    #     func=mdp.orientation_command_error,
+    #     weight=-0.05,
+    #     params={"asset_cfg": SceneEntityCfg("robot_1", body_names=MISSING), "command_name": "ee_1_pose"},
+    # )
+
+    # end_effector_2_position_tracking = RewTerm(
+    #     func=mdp.position_command_error,
+    #     weight=-0.2,
+    #     params={"asset_cfg": SceneEntityCfg("robot_2", body_names=MISSING), "command_name": "ee_2_pose"},
+    # )
+    # end_effector_2_orientation_tracking = RewTerm(
+    #     func=mdp.orientation_command_error,
+    #     weight=-0.05,
+    #     params={"asset_cfg": SceneEntityCfg("robot_2", body_names=MISSING), "command_name": "ee_2_pose"},
+    # )
+
+    # reaching_object = RewTerm(
+    #     func=mdp.object_ee_distance, params={"std": 0.1, "ee_frame_cfg": SceneEntityCfg("ee_1_frame")}, weight=1.0
+    # )
+    # reaching_object = RewTerm(
+    #     func=mdp.object_ee_distance, params={"std": 0.1, "ee_frame_cfg": SceneEntityCfg("ee_2_frame")}, weight=1.0
+    # )
+
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.02}, weight=15.0)
+
+    object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.3,
+            "minimal_height": 0.02,
+            "command_name_receiving": "object_pose_1",
+            "command_name_testing": "object_pose_2",
+            "robot_receiving_cfg": SceneEntityCfg("robot_1"),
+            "robot_testing_cfg": SceneEntityCfg("robot_2"),
+        },
+        weight=16.0,
+    )
+
+    object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.05,
+            "minimal_height": 0.02,
+            "command_name_receiving": "object_pose_2",
+            "command_name_testing": "object_pose_1",
+            "robot_receiving_cfg": SceneEntityCfg("robot_2"),
+            "robot_testing_cfg": SceneEntityCfg("robot_1"),
+        },
+        weight=5.0,
+    )
+
+    object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.3,
+            "minimal_height": 0.02,
+            "command_name_receiving": "object_pose_1",
+            "command_name_testing": "object_pose_2",
+            "robot_receiving_cfg": SceneEntityCfg("robot_1"),
+            "robot_testing_cfg": SceneEntityCfg("robot_2"),
+        },
+        weight=16.0,
+    )
+
+    object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.05,
+            "minimal_height": 0.02,
+            "command_name_receiving": "object_pose_2",
+            "command_name_testing": "object_pose_1",
+            "robot_receiving_cfg": SceneEntityCfg("robot_2"),
+            "robot_testing_cfg": SceneEntityCfg("robot_1"),
+        },
+        weight=5.0,
+    )
+
+    # moving further arm from initial position penalty
+    further_arm_deviation_robot_1 = RewTerm(
+        func=mdp.second_arm_deviation_l1,
+        weight=0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot_1",
+                joint_names=[
+                    "psm_yaw_joint",
+                    "psm_pitch_end_joint",
+                    "psm_main_insertion_joint",
+                    "psm_tool_roll_joint",
+                    "psm_tool_pitch_joint",
+                    "psm_tool_yaw_joint",
+                ],
+            ),
+            "command_name_receiving": "object_pose_1",
+            "command_name_testing": "object_pose_2",
+            "robot_receiving_cfg": SceneEntityCfg("robot_1"),
+            "robot_testing_cfg": SceneEntityCfg("robot_2"),
+        },
+    )
+
+    further_arm_deviation_robot_2 = RewTerm(
+        func=mdp.second_arm_deviation_l1,
+        weight=0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot_2",
+                joint_names=[
+                    "psm_yaw_joint",
+                    "psm_pitch_end_joint",
+                    "psm_main_insertion_joint",
+                    "psm_tool_roll_joint",
+                    "psm_tool_pitch_joint",
+                    "psm_tool_yaw_joint",
+                ],
+            ),
+            "command_name_receiving": "object_pose_2",
+            "command_name_testing": "object_pose_1",
+            "robot_receiving_cfg": SceneEntityCfg("robot_2"),
+            "robot_testing_cfg": SceneEntityCfg("robot_1"),
+        },
+    )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
+
+    # penalty for object dropping
+    object_drop = RewTerm(func=mdp.object_velocity, weight=-1.0)
+
+    # joint velosity penalty
+    joint_1_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.0001,
+        params={"asset_cfg": SceneEntityCfg("robot_1")},
+    )
+    joint_2_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.0001,
+        params={"asset_cfg": SceneEntityCfg("robot_2")},
+    )
 
 
 @configclass
@@ -170,7 +360,7 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
     object_dropping = DoneTerm(
-        func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
+        func=mdp.root_height_below_minimum, params={"minimum_height": -0.02, "asset_cfg": SceneEntityCfg("object")}
     )
 
 
@@ -182,6 +372,14 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000}
     )
 
+    joint_vel_1 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "joint_1_vel", "weight": -1e-1, "num_steps": 10000}
+    )
+    # //:TODO: Check if this is correct, maybe need to modify sooner
+    joint_vel_2 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "joint_2_vel", "weight": -1e-1, "num_steps": 10000}
+    )
+
 
 ##
 # Environment configuration
@@ -190,7 +388,7 @@ class CurriculumCfg:
 
 @configclass
 class HandoverEnvCfg(ManagerBasedRLEnvCfg):
-    """Configuration for the handover environment."""
+    """Configuration for the reach end-effector pose tracking environment."""
 
     # Scene settings
     scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)
@@ -209,8 +407,8 @@ class HandoverEnvCfg(ManagerBasedRLEnvCfg):
         # general settings
         self.decimation = 2
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 15.0
+        self.episode_length_s = 5.5
         # simulation settings
-        self.sim.dt = 0.01  # 100Hz
-        self.viewer.eye = (0.0, 0.5, 0.2)
-        self.viewer.lookat = (0.0, 0.0, 0.05)
+        self.sim.dt = 0.01
+        self.viewer.eye = (-1.0, 2.0, 2.0)
+        self.viewer.lookat = (0.8, 0.0, 0.04)
