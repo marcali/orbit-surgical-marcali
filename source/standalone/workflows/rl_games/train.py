@@ -60,19 +60,34 @@ from omni.isaac.lab_tasks.utils.wrappers.rl_games import RlGamesGpuEnv, RlGamesV
 import orbit.surgical.tasks  # noqa: F401
 
 
-def main():
+@hydra_task_config(args_cli.task, "rl_games_cfg_entry_point")
+def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg, agent_cfg: dict):
     """Train with RL-Games agent."""
-    # parse seed from command line
-    args_cli_seed = args_cli.seed
-
-    # parse configuration
-    env_cfg = parse_env_cfg(
-        args_cli.task, device=args_cli.device, num_envs=args_cli.num_envs, use_fabric=not args_cli.disable_fabric
+    # override configurations with non-hydra CLI arguments
+    env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
+    agent_cfg["params"]["seed"] = args_cli.seed if args_cli.seed is not None else agent_cfg["params"]["seed"]
+    agent_cfg["params"]["config"]["max_epochs"] = (
+        args_cli.max_iterations if args_cli.max_iterations is not None else agent_cfg["params"]["config"]["max_epochs"]
     )
-    agent_cfg = load_cfg_from_registry(args_cli.task, "rl_games_cfg_entry_point")
-    # override from command line
-    if args_cli_seed is not None:
-        agent_cfg["params"]["seed"] = args_cli_seed
+    if args_cli.checkpoint is not None:
+        resume_path = retrieve_file_path(args_cli.checkpoint)
+        agent_cfg["params"]["load_checkpoint"] = True
+        agent_cfg["params"]["load_path"] = resume_path
+        print(f"[INFO]: Loading model checkpoint from: {agent_cfg['params']['load_path']}")
+    train_sigma = float(args_cli.sigma) if args_cli.sigma is not None else None
+
+    # multi-gpu training config
+    if args_cli.distributed:
+        agent_cfg["params"]["seed"] += app_launcher.global_rank
+        agent_cfg["params"]["config"]["device"] = f"cuda:{app_launcher.local_rank}"
+        agent_cfg["params"]["config"]["device_name"] = f"cuda:{app_launcher.local_rank}"
+        agent_cfg["params"]["config"]["multi_gpu"] = True
+        # update env config device
+        env_cfg.sim.device = f"cuda:{app_launcher.local_rank}"
+
+    # set the environment seed (after multi-gpu config for updated rank from agent seed)
+    # note: certain randomizations occur in the environment initialization so we set the seed here
+    env_cfg.seed = agent_cfg["params"]["seed"]
 
     # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rl_games", agent_cfg["params"]["config"]["name"])
@@ -84,19 +99,6 @@ def main():
     # logging directory path: <train_dir>/<full_experiment_name>
     agent_cfg["params"]["config"]["train_dir"] = log_root_path
     agent_cfg["params"]["config"]["full_experiment_name"] = log_dir
-
-    # multi-gpu training config
-    if args_cli.distributed:
-        agent_cfg["params"]["seed"] += app_launcher.global_rank
-        agent_cfg["params"]["config"]["device"] = f"cuda:{app_launcher.local_rank}"
-        agent_cfg["params"]["config"]["device_name"] = f"cuda:{app_launcher.local_rank}"
-        agent_cfg["params"]["config"]["multi_gpu"] = True
-        # update env config device
-        env_cfg.sim.device = f"cuda:{app_launcher.local_rank}"
-
-    # max iterations
-    if args_cli.max_iterations:
-        agent_cfg["params"]["config"]["max_epochs"] = args_cli.max_iterations
 
     # dump the configuration into log-directory
     dump_yaml(os.path.join(log_root_path, log_dir, "params", "env.yaml"), env_cfg)
@@ -114,7 +116,7 @@ def main():
     # wrap for video recording
     if args_cli.video:
         video_kwargs = {
-            "video_folder": os.path.join(log_root_path, log_dir, "videos"),
+            "video_folder": os.path.join(log_root_path, log_dir, "videos", "train"),
             "step_trigger": lambda step: step % args_cli.video_interval == 0,
             "video_length": args_cli.video_length,
             "disable_logger": True,
@@ -138,12 +140,13 @@ def main():
     runner = Runner(IsaacAlgoObserver())
     runner.load(agent_cfg)
 
-    # set seed of the env
-    env.seed(agent_cfg["params"]["seed"])
     # reset the agent and env
     runner.reset()
     # train the agent
-    runner.run({"train": True, "play": False, "sigma": None})
+    if args_cli.checkpoint is not None:
+        runner.run({"train": True, "play": False, "sigma": train_sigma, "checkpoint": resume_path})
+    else:
+        runner.run({"train": True, "play": False, "sigma": train_sigma})
 
     # close the simulator
     env.close()
