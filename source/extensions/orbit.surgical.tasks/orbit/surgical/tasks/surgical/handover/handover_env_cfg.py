@@ -90,8 +90,8 @@ class CommandsCfg:
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(-0.05, 0.05),
             pos_y=(-0.05, 0.05),
-            pos_z=(-0.12, -0.08),
-            roll=(3.14, 3.14),
+            pos_z=(-0.12, -0.12),
+            roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
         ),
@@ -105,8 +105,8 @@ class CommandsCfg:
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(-0.05, 0.05),
             pos_y=(-0.05, 0.05),
-            pos_z=(-0.12, -0.08),
-            roll=(3.14, 3.14),
+            pos_z=(-0.12, -0.12),
+            roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
         ),
@@ -335,7 +335,7 @@ class RewardsCfg:
     )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
 
     # penalty for object dropping
     object_drop = RewTerm(func=mdp.object_velocity, weight=-1.0)
@@ -343,12 +343,12 @@ class RewardsCfg:
     # joint velosity penalty
     joint_1_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.0001,
+        weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot_1")},
     )
     joint_2_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.0001,
+        weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot_2")},
     )
 
@@ -405,10 +405,10 @@ class HandoverEnvCfg(ManagerBasedRLEnvCfg):
     def __post_init__(self):
         """Post initialization."""
         # general settings
-        self.decimation = 2
+        self.decimation = 4
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 5.5
+        self.episode_length_s = 4.0
         # simulation settings
-        self.sim.dt = 0.01
-        self.viewer.eye = (-1.0, 2.0, 2.0)
-        self.viewer.lookat = (0.8, 0.0, 0.04)
+        self.sim.dt = 1.0 / 200.0
+        self.viewer.eye = (0.2, 0.2, 0.1)
+        self.viewer.lookat = (0.0, 0.0, 0.04)
