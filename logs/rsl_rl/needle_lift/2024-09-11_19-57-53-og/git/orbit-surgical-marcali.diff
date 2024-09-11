@@ -1,0 +1,38 @@
+--- git status ---
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   source/extensions/orbit.surgical.tasks/orbit/surgical/tasks/surgical/lift/mdp/rewards.py
+
+no changes added to commit (use "git add" and/or "git commit -a") 
+
+
+--- git diff ---
+diff --git a/source/extensions/orbit.surgical.tasks/orbit/surgical/tasks/surgical/lift/mdp/rewards.py b/source/extensions/orbit.surgical.tasks/orbit/surgical/tasks/surgical/lift/mdp/rewards.py
+index 2002edb..765b02a 100644
+--- a/source/extensions/orbit.surgical.tasks/orbit/surgical/tasks/surgical/lift/mdp/rewards.py
++++ b/source/extensions/orbit.surgical.tasks/orbit/surgical/tasks/surgical/lift/mdp/rewards.py
+@@ -88,13 +88,13 @@ def object_goal_distance(
+     command = env.command_manager.get_command(command_name)
+     # compute the desired position in the world frame
+     des_pos_b = command[:, :3]
+-    des_pos_w, _ = combine_frame_transforms(
+-        robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b
+-    )
+-    # Distance of the object to the goal: (num_envs,)
+-    object_goal_distance = torch.norm(object.data.root_pos_w - des_pos_w, dim=1)
+-    reward = 1 - torch.tanh(object_goal_distance / std)
+-    # multiplied by weight for logging
++    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
++
++    # distance of the end-effector to the object: (num_envs,)
++    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
++    # rewarded if the object is lifted above the threshold
++    reward = (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std))
++        # multiplied by weight for logging
+     # if std == 0.3:
+     # modified_reward = reward * 16
+     # else:
