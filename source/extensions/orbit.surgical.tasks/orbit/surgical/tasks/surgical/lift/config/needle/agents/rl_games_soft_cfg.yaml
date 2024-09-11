@@ -7,14 +7,14 @@ params:
     clip_actions: 100.0
 
   algo:
-    name: sac
+    name: a2c_continuous
 
   model:
-    name: soft_actor_critic
+    name: continuous_a2c_logstd
 
   network:
-    name: soft_actor_critic
-    separate: True
+    name: actor_critic
+    separate: False
     space:
       continuous:
         mu_activation: None
@@ -29,10 +29,12 @@ params:
     mlp:
       units: [256, 128, 64]
       activation: elu
+      d2rl: False
 
       initializer:
         name: default
-    log_std_bounds: [-5, 2]
+      regularizer:
+        name: None
 
   load_checkpoint: False # flag which sets whether to load the checkpoint
   load_path: '' # path to the checkpoint to load
@@ -43,33 +45,24 @@ params:
     device: 'cuda:0'
     device_name: 'cuda:0'
     multi_gpu: False
+    mixed_precision: False
     normalize_input: True
     normalize_value: True
-    num_actors: -1
     reward_shaper:
       scale_value: 0.01
-    #normalize_advantage: True
-    gamma: 0.99
-    tau: 0.95
-    learning_rate: 1e-4
-    lr_schedule: adaptive
-    schedule_type: legacy
-    kl_threshold: 0.01
-    score_to_win: 100000000
-
+    device: cuda
     max_epochs: 1500
+    num_steps_per_episode: 24
     save_best_after: 100
-    save_frequency: 50
-    print_stats: True
-    #grad_norm: 1.0
-    #entropy_coef: 0.001
-    #truncate_grads: True
-    e_clip: 0.2
-    horizon_length: 24
-    minibatch_size: 24576
-    mini_epochs: 8
-    critic_coef: 4
-    clip_value: True
-    clip_actions: False
-    seq_len: 4
-    bounds_loss_coef: 0.0001
+    save_frequency: 100
+    gamma: 0.99
+    init_alpha: 1
+    alpha_lr: 0.0002
+    actor_lr: 0.0003
+    critic_lr: 0.0003
+    critic_tau: 0.005
+    batch_size: 2048
+    learnable_temperature: True
+    num_warmup_steps: 8 # total number of warmup steps: num_actors * num_steps_per_episode * num_warmup_steps
+    replay_buffer_size: 1000000
+    num_actors: 64
