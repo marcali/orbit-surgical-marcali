@@ -22,6 +22,9 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.NeedleLiftEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
@@ -32,6 +35,9 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.NeedleLiftEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
