@@ -120,7 +120,8 @@ def object_goal_distance(
 
     # Compute the reward for the closest robot
     dist_closest = torch.where(closest_robot_distance == 0, 0.001, closest_robot_distance)
-    reward = 1 - torch.tanh(dist_closest / std)
+    #reward = 1 - torch.tanh(dist_closest / std)
+    reward = (object.data.root_pos_w[:, 2] > minimal_height) * (torch.div(1, torch.square(10 * dist_closest)))
 
     return reward
 
