@@ -11,7 +11,7 @@ from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
     RslRlPpoAlgorithmCfg,
 )
 
-
+@configclass
 class HandoverNeedlePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
