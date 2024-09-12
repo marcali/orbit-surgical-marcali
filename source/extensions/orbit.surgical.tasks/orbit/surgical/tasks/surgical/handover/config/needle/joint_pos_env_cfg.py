@@ -48,7 +48,7 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 "psm_tool_pitch_joint",
                 "psm_tool_yaw_joint",
             ],
-            scale=0.4,
+            scale=0.5,
             use_default_offset=True,
         )
         self.actions.body_2_joint_pos = mdp.JointPositionActionCfg(
@@ -61,7 +61,7 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 "psm_tool_pitch_joint",
                 "psm_tool_yaw_joint",
             ],
-            scale=0.4,
+            scale=0.5,
             use_default_offset=True,
         )
         self.actions.finger_1_joint_pos = mdp.BinaryJointPositionActionCfg(
