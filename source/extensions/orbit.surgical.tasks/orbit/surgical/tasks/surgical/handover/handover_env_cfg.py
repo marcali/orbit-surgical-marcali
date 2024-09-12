@@ -292,7 +292,7 @@ class RewardsCfg:
     # moving further arm from initial position penalty
     further_arm_deviation_robot_1 = RewTerm(
         func=mdp.second_arm_deviation_l1,
-        weight=0.1,
+        weight=1.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot_1",
@@ -314,7 +314,7 @@ class RewardsCfg:
 
     further_arm_deviation_robot_2 = RewTerm(
         func=mdp.second_arm_deviation_l1,
-        weight=0.1,
+        weight=1.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot_2",
@@ -407,7 +407,7 @@ class HandoverEnvCfg(ManagerBasedRLEnvCfg):
         # general settings
         self.decimation = 4
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 4.0
+        self.episode_length_s = 3.0
         # simulation settings
         self.sim.dt = 1.0 / 200.0
         self.viewer.eye = (0.2, 0.2, 0.1)
