@@ -291,10 +291,10 @@ class CurriculumCfg:
     joint_vel2 = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1, "num_steps": 15000}
     )
-
-    object_moving = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 20000}
-    )
+    #does nothing for rsl rl and kind of impreves for slrl
+    # object_moving = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 20000}
+    # )
 
 
 ##
