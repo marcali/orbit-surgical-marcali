@@ -147,17 +147,17 @@ class EventCfg:
     #         "operation": "scale",
     #     },
     # )
-    # robot_joint_stiffness_and_damping = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
-    #         "stiffness_distribution_params": (0.3, 3.0),  # default: 3.0
-    #         "damping_distribution_params": (0.75, 1.5),  # default: 0.1
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    robot_joint_stiffness_and_damping = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
+            "stiffness_distribution_params": (0.3, 3.0),  # default: 3.0
+            "damping_distribution_params": (0.75, 1.5),  # default: 0.1
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
 
     # -- object
     # object_physics_material = EventTerm(
@@ -199,7 +199,7 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # previously weight 0.4
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
+    #reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
 
     # increased lifing reward
     # best result: no reach, lift weight 15, dt 0.01, 5.sec
@@ -232,13 +232,13 @@ class RewardsCfg:
 
     # align_ee_handle = RewTerm(func=mdp.align_ee_handle, weight=0.5)
 
-    # object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
+    object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
 
-    # joint_deviation_hip = RewTerm(
-    #     func=mdp.joint_deviation_l1,
-    #     weight=-0.01,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
-    # )
+    joint_deviation_hip = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-0.01,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
+    )
 
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -281,20 +281,20 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
 
-    # action_rate2 = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -2, "num_steps": 20000}
-    # )
+    action_rate2 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -2, "num_steps": 20000}
+    )
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
     # )
 
-    # joint_vel2 = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -2, "num_steps": 20000}
-    # )
+    joint_vel2 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -2, "num_steps": 20000}
+    )
 
-    # object_moving = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 30000}
-    # )
+    object_moving = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 30000}
+    )
 
 
 ##
