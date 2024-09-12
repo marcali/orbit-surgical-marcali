@@ -240,17 +240,17 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
     )
 
-    grasp_needle = RewTerm(
-        func=mdp.grasp_needle,
-        weight=5.0,
-        params={
-            "threshold": 0.01,
-            "open_joint_pos1": MISSING,
-            "open_joint_pos2": MISSING,
-            "asset_cfg1": SceneEntityCfg("robot", joint_names=["psm_tool_gripper1_joint"]),
-            "asset_cfg2": SceneEntityCfg("robot", joint_names=["psm_tool_gripper2_joint"]),
-        },
-    )
+    # grasp_needle = RewTerm(
+    #     func=mdp.grasp_needle,
+    #     weight=5.0,
+    #     params={
+    #         "threshold": 0.01,
+    #         "open_joint_pos1": MISSING,
+    #         "open_joint_pos2": MISSING,
+    #         "asset_cfg1": SceneEntityCfg("robot", joint_names=["psm_tool_gripper1_joint"]),
+    #         "asset_cfg2": SceneEntityCfg("robot", joint_names=["psm_tool_gripper2_joint"]),
+    #     },
+    # )
     # undesired_contacts = RewTerm(
     #     func=mdp.undesired_obstacle_contacts,
     #     weight=-1.0,

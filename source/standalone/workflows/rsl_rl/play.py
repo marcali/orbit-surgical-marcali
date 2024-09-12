@@ -107,13 +107,17 @@ def main():
                 writer.writerow(["Step", "Reward"])
 
     # Function to log the reward after each step
-    def log_reward(step, reward, path):
+    def log_reward(step, reward,dones, extra, path):
         # Convert the tensor to a list
         reward_list = reward.tolist()
+        dones_list = dones.tolist()
         
         # Flatten the list if it contains nested lists
-        flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
-        print(f"Step: {step}, Reward: {flat_reward_list}")
+        #flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
+        flat_dones_list = [item for sublist in dones_list for item in sublist] if isinstance(dones_list[0], list) else dones_list
+        #print(f"Step: {step}, Reward: {flat_reward_list}")
+        print(f"Step: {step}, Extra: {extra}")
+        print(f"Step: {step}, Dones: {flat_dones_list}")
         # Write the step and flattened reward list to the CSV file
         # with open(path, "a", newline="") as csvfile:
         #     writer = csv.writer(csvfile)
@@ -151,10 +155,10 @@ def main():
             # agent stepping
             actions = policy(obs)
             # env stepping
-            obs, rew, _, _ = env.step(actions)
+            obs, rew, dones, extra = env.step(actions)
             #rewards += rew
             timestep += 1
-            log_reward(timestep, rew, log_performance_path)
+            log_reward(timestep, rew, dones, extra, log_performance_path)
             if args_cli.video:
                 timestep += 1
                 # Exit the play loop after recording one video
