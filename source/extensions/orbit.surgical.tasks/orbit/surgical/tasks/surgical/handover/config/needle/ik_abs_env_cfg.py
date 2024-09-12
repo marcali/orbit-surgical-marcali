@@ -24,10 +24,10 @@ class NeedleHandoverEnvCfg(joint_pos_env_cfg.NeedleHandoverEnvCfg):
         # Set PSM as robot
         # We switch here to a stiffer PD controller for IK tracking to be better.
         self.scene.robot_1 = PSM_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot_1")
-        self.scene.robot_1.init_state.pos = (0.2, 0.0, 0.15)
+        self.scene.robot_1.init_state.pos = (0.1, 0.0, 0.15)
         self.scene.robot_1.init_state.rot = (1.0, 0.0, 0.0, 0.0)
         self.scene.robot_2 = PSM_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot_2")
-        self.scene.robot_2.init_state.pos = (-0.2, 0.0, 0.15)
+        self.scene.robot_2.init_state.pos = (-0.1, 0.0, 0.15)
         self.scene.robot_2.init_state.rot = (1.0, 0.0, 0.0, 0.0)
 
         # Set actions for the specific robot type (PSM)
