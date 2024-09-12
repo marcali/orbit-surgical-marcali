@@ -120,8 +120,8 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
 
 
         # override rewards
-        # self.rewards.grasp_needle.params["open_joint_pos1"] = 0.04
-        # self.rewards.grasp_needle.params["open_joint_pos2"] = -0.04
+        self.rewards.grasp_needle.params["open_joint_pos1"] = 0.05
+        self.rewards.grasp_needle.params["open_joint_pos2"] = -0.05
 
 
 @configclass
