@@ -52,6 +52,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": ik_abs_env_cfg.NeedleLiftEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
@@ -62,6 +64,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": ik_abs_env_cfg.NeedleLiftEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
@@ -76,6 +80,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": ik_rel_env_cfg.NeedleLiftEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
@@ -86,6 +92,18 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": ik_rel_env_cfg.NeedleLiftEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftNeedlePPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
+
+# gym.register(
+#     id="Isaac-Lift-Cube-Franka-IK-Rel-SAC-v0",
+#     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
+#     kwargs={
+#         "env_cfg_entry_point": ik_rel_env_cfg_sac.FrankaGraspObjectEnvCfg,
+#         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_sac_cfg.yaml",
+#     },
+#     disable_env_checker=True,
+# )
