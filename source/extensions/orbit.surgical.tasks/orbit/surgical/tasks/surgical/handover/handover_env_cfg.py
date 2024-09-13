@@ -335,7 +335,7 @@ class RewardsCfg:
     )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-2)
 
     # penalty for object dropping
     object_drop = RewTerm(func=mdp.object_velocity, weight=-1.0)
