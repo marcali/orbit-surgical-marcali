@@ -48,7 +48,7 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 "psm_tool_pitch_joint",
                 "psm_tool_yaw_joint",
             ],
-            scale=0.4,
+            scale=0.5,
             use_default_offset=True,
         )
         self.actions.body_2_joint_pos = mdp.JointPositionActionCfg(
@@ -61,7 +61,7 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 "psm_tool_pitch_joint",
                 "psm_tool_yaw_joint",
             ],
-            scale=0.4,
+            scale=0.5,
             use_default_offset=True,
         )
         self.actions.finger_1_joint_pos = mdp.BinaryJointPositionActionCfg(
@@ -97,6 +97,23 @@ class NeedleHandoverEnvCfg(HandoverEnvCfg):
                 ),
             ),
         )
+        
+        # self.scene.object = RigidObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/Object",
+        #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(1, 0, 0, 0)),
+        #     spawn=UsdFileCfg(
+        #         usd_path=f"{ORBITSURGICAL_ASSETS_DATA_DIR}/Props/tube/tube_02.usd",
+        #         scale=(0.02, 0.04, 0.02),
+        #         rigid_props=RigidBodyPropertiesCfg(
+        #             solver_position_iteration_count=16,
+        #             solver_velocity_iteration_count=8,
+        #             max_angular_velocity=200,
+        #             max_linear_velocity=200,
+        #             max_depenetration_velocity=1.0,
+        #             disable_gravity=False,
+        #         ),
+        #     ),
+        # )
         
         #Set an obstacle
         # self.scene.obstacle = RigidObjectCfg(
