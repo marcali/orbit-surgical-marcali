@@ -43,7 +43,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
         # obstacle: will be populated by agent env cfg
-    # obstacle: RigidObjectCfg = MISSING
+    #obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -147,6 +147,17 @@ class EventCfg:
     #         "operation": "scale",
     #     },
     # )
+
+    # robot_scale_mass = EventTerm(
+    #     func=mdp.randomize_rigid_body_mass,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "mass_distribution_params": (0.95, 1.05),
+    #         "operation": "scale",
+    #     },
+    # )
+
     # robot_joint_stiffness_and_damping = EventTerm(
     #     func=mdp.randomize_actuator_gains,
     #     mode="startup",
@@ -232,7 +243,7 @@ class RewardsCfg:
 
     # align_ee_handle = RewTerm(func=mdp.align_ee_handle, weight=0.5)
 
-    object_drop = RewTerm(func=mdp.object_velocity, weight=-1.0)
+    object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
 
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -240,7 +251,7 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
     )
     
-    applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.001, params={"asset_cfg": SceneEntityCfg("robot")})
+    applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -294,6 +305,8 @@ class CurriculumCfg:
     joint_vel2 = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1.0, "num_steps": 15000}
     )
+
+    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -0.1, "num_steps": 15000})
     #does nothing for rsl rl and kind of impreves for slrl
     # object_moving = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 20000}
