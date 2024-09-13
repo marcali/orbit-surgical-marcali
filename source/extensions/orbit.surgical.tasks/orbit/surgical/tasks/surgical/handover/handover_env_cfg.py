@@ -292,7 +292,7 @@ class RewardsCfg:
     # moving further arm from initial position penalty
     further_arm_deviation_robot_1 = RewTerm(
         func=mdp.second_arm_deviation_l1,
-        weight=0.1,
+        weight=1.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot_1",
@@ -314,7 +314,7 @@ class RewardsCfg:
 
     further_arm_deviation_robot_2 = RewTerm(
         func=mdp.second_arm_deviation_l1,
-        weight=0.1,
+        weight=1.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot_2",
@@ -335,7 +335,7 @@ class RewardsCfg:
     )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-2)
 
     # penalty for object dropping
     object_drop = RewTerm(func=mdp.object_velocity, weight=-1.0)
