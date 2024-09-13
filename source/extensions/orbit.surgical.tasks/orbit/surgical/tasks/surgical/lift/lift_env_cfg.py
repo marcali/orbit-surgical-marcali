@@ -199,24 +199,24 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # previously weight 0.4
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
+    #reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
 
     # increased lifing reward
     # best result: no reach, lift weight 15, dt 0.01, 5.sec
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.03}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.03}, weight=21.0)
 
     # sd 0.3
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.3, "minimal_height": 0.03, "command_name": "object_pose"},
-        weight=16.0,
+        weight=22.0,
     )
 
     # sd 0.05
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.05, "minimal_height": 0.03, "command_name": "object_pose"},
-        weight=5.0,
+        weight=7.0,
     )
 
     # action penalty
@@ -226,7 +226,7 @@ class RewardsCfg:
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-1e-4,
+        weight=-1e-3,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
@@ -240,7 +240,7 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
     )
     
-    applied_torque_limits = RewTerm(function=mdp.applied_torque_limits, weight=-0.1, params={"asset_cfg": SceneEntityCfg("robot")})
+    applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.1, params={"asset_cfg": SceneEntityCfg("robot")})
 
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -258,6 +258,7 @@ class RewardsCfg:
     #     weight=-1.0,
     #     params={"sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 1.0},
     # )
+    #collision = RewTerm(func=mdp.collision_penalty, weight=-1.0)
 
 
 @configclass
@@ -276,22 +277,22 @@ class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
     action_rate = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000}
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -0.3, "num_steps": 10000}
     )
 
     joint_vel = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
+        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -0.01, "num_steps": 10000}
     )
 
     action_rate2 = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1, "num_steps": 15000}
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
     )
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
     # )
 
     joint_vel2 = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1, "num_steps": 15000}
+        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1.0, "num_steps": 15000}
     )
     #does nothing for rsl rl and kind of impreves for slrl
     # object_moving = CurrTerm(
