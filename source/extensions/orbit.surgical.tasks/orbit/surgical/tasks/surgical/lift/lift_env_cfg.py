@@ -239,6 +239,8 @@ class RewardsCfg:
         weight=-0.01,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
     )
+    
+    applied_torque_limits = RewTerm(function=mdp.applied_torque_limits, weight=-0.1, params={"asset_cfg": SceneEntityCfg("robot")})
 
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
