@@ -51,14 +51,14 @@ models:
   
 agent:
   gradient_steps: 1
-  batch_size: 64
+  batch_size: 256
   discount_factor: 0.98
   soft_update_rate: 0.005   # For target networks in SAC (also known as tau)
   learning_rate: 3.e-4       # Common learning rate for both actor and critic
   actor_learning_rate: 3.e-4
   critic_learning_rate: 3.e-4
   alpha_learning_rate: 3.e-4 # If temperature is learnable
-  initial_alpha: 0.2        # Initial value for entropy coefficient (alpha)
+  initial_alpha: 1.0        # Initial value for entropy coefficient (alpha)
   automatic_entropy_tuning: True
   random_timesteps: 0
   learning_starts: 1000
@@ -79,5 +79,5 @@ agent:
 # Sequential trainer
 # https://skrl.readthedocs.io/en/latest/modules/skrl.trainers.sequential.html
 trainer:
-  timesteps: 24000
+  timesteps: 50000
   environment_info: "log"
