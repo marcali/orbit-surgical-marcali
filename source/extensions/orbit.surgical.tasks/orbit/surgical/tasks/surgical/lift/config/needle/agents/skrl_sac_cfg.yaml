@@ -54,10 +54,10 @@ agent:
   batch_size: 64
   discount_factor: 0.98
   soft_update_rate: 0.005   # For target networks in SAC (also known as tau)
-  learning_rate: 3e-4       # Common learning rate for both actor and critic
-  actor_learning_rate: 3e-4
-  critic_learning_rate: 3e-4
-  alpha_learning_rate: 3e-4 # If temperature is learnable
+  learning_rate: 3.e-4       # Common learning rate for both actor and critic
+  actor_learning_rate: 3.e-4
+  critic_learning_rate: 3.e-4
+  alpha_learning_rate: 3.e-4 # If temperature is learnable
   initial_alpha: 0.2        # Initial value for entropy coefficient (alpha)
   automatic_entropy_tuning: True
   random_timesteps: 0

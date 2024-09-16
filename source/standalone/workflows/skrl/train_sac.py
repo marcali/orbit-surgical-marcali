@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+# ${IsaacLab_PATH}/isaaclab.sh -p source/standalone/workflows/skrl/train_sac.py --task Isaac-Lift-Needle-PSM-IK-Rel-SAC-v0  --headless
+
 """
 Script to train RL agent with skrl.
 
@@ -24,7 +26,6 @@ parser = argparse.ArgumentParser(description="Train an RL agent with skrl.")
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
 parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
 parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
-parser.add_argument("--cpu", action="store_true", default=False, help="Use CPU pipeline.")
 parser.add_argument(
     "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
 )
@@ -64,7 +65,7 @@ from omni.isaac.lab.utils.io import dump_pickle, dump_yaml
 
 import omni.isaac.lab_tasks  # noqa: F401
 from omni.isaac.lab_tasks.utils import load_cfg_from_registry, parse_env_cfg
-from omni.isaac.lab_tasks.utils.wrappers.skrl import SkrlSequentialLogTrainer, SkrlVecEnvWrapper, process_skrl_cfg
+from omni.isaac.lab_tasks.utils.wrappers.skrl import SkrlVecEnvWrapper, process_skrl_cfg
 
 import orbit.surgical.tasks  # noqa: F401
 
@@ -98,11 +99,7 @@ def main():
     if args_cli.distributed:
         # update env config device
         env_cfg.sim.device = f"cuda:{app_launcher.local_rank}"
-
-    # max iterations for training
-    if args_cli.max_iterations:
-        experiment_cfg["trainer"]["timesteps"] = args_cli.max_iterations * experiment_cfg["agent"]["rollouts"]
-
+ 
     # dump the configuration into log-directory
     dump_yaml(os.path.join(log_dir, "params", "env.yaml"), env_cfg)
     dump_yaml(os.path.join(log_dir, "params", "agent.yaml"), experiment_cfg)
@@ -179,8 +176,8 @@ def main():
         )
         models["value"] = models["policy"]
 
-    memory_size = experiment_cfg["agent"]["rollouts"]  # memory_size is the agent's number of rollouts
-    memory = RandomMemory(memory_size=memory_size, num_envs=env.num_envs, device=env.device)
+    #memory_size = experiment_cfg["agent"]["rollouts"]  # memory_size is the agent's number of rollouts
+    memory = RandomMemory(memory_size=2000, num_envs=env.num_envs, device=env.device)
 
     # configure and instantiate sac agent
     agent_cfg = SAC_DEFAULT_CONFIG.copy()
@@ -188,7 +185,6 @@ def main():
     agent_cfg.update(process_skrl_cfg(experiment_cfg["agent"]))
 
     agent_cfg["state_preprocessor_kwargs"].update({"size": env.observation_space, "device": env.device})
-    agent_cfg["value_preprocessor_kwargs"].update({"size": 1, "device": env.device})
 
     agent = SAC(
         models=models,
@@ -202,7 +198,8 @@ def main():
     # configure and instantiate a custom RL trainer for logging episode events
     # https://skrl.readthedocs.io/en/latest/modules/skrl.trainers.base_class.html
     trainer_cfg = experiment_cfg["trainer"]
-    trainer = SkrlSequentialLogTrainer(cfg=trainer_cfg, env=env, agents=agent)
+    trainer_cfg["close_environment_at_exit"] = False
+    trainer = SequentialTrainer(cfg=trainer_cfg, env=env, agents=agent)
 
     # train the agent
     trainer.train()
