@@ -258,6 +258,11 @@ class RewardsCfg:
     #     weight=-1.0,
     #     params={"sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 1.0},
     # )
+    
+    #     # collision penalty
+    # shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
+    # # object_collision = RewTerm(func=mdp.object_collision_pentaly, params={}, weight=-1.0)
+    # object_drop = RewTerm(func=mdp.rewards_sweep2.Object_drop, weight=-0.2)
 
 
 @configclass

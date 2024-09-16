@@ -232,3 +232,46 @@ def grasp_needle(
     # log_to_csv(os.path.join(log_root_path, "grasp_needle.csv"), modified_reward.tolist())
 
     return total_reward
+
+def dynamic_penalty(
+    env: ManagerBasedRLEnv,
+    std: float,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
+    obstacle_cfg: SceneEntityCfg = SceneEntityCfg("obstacle"),
+) -> torch.Tensor:
+    """Apply a dynamic penalty for the task of picking a needle while avoiding an obstacle."""
+    
+    # Extract the needle, end-effector, and obstacle positions
+    object: RigidObject = env.scene[object_cfg.name]
+    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+    obstacle: RigidObject = env.scene[obstacle_cfg.name]
+
+    # Position of the needle and obstacle
+    needle_pos_w = object.data.root_pos_w
+    obstacle_pos_w = obstacle.data.root_pos_w
+    ee_w = ee_frame.data.target_pos_w[..., 0, :]
+
+    # Compute the distance between the end-effector and the needle
+    object_ee_distance = torch.norm(needle_pos_w - ee_w, dim=1)
+    # Reward the agent for approaching the needle
+    reach_reward = 1 - torch.tanh(object_ee_distance / std)
+
+    # Compute the distance between the end-effector and the obstacle
+    obstacle_ee_distance = torch.norm(obstacle_pos_w - ee_w, dim=1)
+
+    # Define a threshold for proximity to the obstacle (closer than 0.1 meters is penalized)
+    obstacle_threshold = 0.1
+    # Penalty increases as the end-effector gets closer to the obstacle
+    obstacle_penalty = torch.where(obstacle_ee_distance < obstacle_threshold,
+                                   1 - (obstacle_ee_distance / obstacle_threshold), 
+                                   torch.tensor(0.0))
+
+    # Dynamic penalty combines reward for reaching the needle and penalty for approaching the obstacle
+    total_penalty = reach_reward - 5 * obstacle_penalty
+
+    # Clamp the total penalty to ensure it's within a valid range
+    total_penalty = torch.clamp(total_penalty, -1, 1)
+
+    return total_penalty
+
