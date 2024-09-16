@@ -59,7 +59,7 @@ agent:
   rewards_shaper_scale: 0.01
   experiment:
     directory: /home/ubuntu/orbit-surgical-marcali/logs/skrl/lift
-    experiment_name: 2024-09-13_18-37-16
+    experiment_name: 2024-09-13_22-25-30
     write_interval: 120
     checkpoint_interval: 1200
 trainer:
