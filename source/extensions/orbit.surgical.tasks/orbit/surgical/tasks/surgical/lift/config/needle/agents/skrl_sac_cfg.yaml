@@ -53,20 +53,27 @@ agent:
   gradient_steps: 1
   batch_size: 256
   discount_factor: 0.98
-  soft_update_rate: 0.005   # For target networks in SAC (also known as tau)
-  learning_rate: 3.e-4       # Common learning rate for both actor and critic
+  polyak: 0.01   # For target networks in SAC (also known as tau)
+  #learning_rate: 3.e-4       # Common learning rate for both actor and critic
   actor_learning_rate: 3.e-4
   critic_learning_rate: 3.e-4
-  alpha_learning_rate: 3.e-4 # If temperature is learnable
-  initial_alpha: 1.0        # Initial value for entropy coefficient (alpha)
+  learning_rate_scheduler: "KLAdaptiveLR"
+  learning_rate_scheduler_kwargs:
+    kl_threshold: 0.008
+    target_kl: 0.01
+ # alpha_learning_rate: 3.e-4 # If temperature is learnable
+  #initial_alpha: 1.0        # Initial value for entropy coefficient (alpha)
   automatic_entropy_tuning: True
   random_timesteps: 0
   learning_starts: 1000
-  replay_buffer_size: 1000000
+  #replay_buffer_size: 1000000
   grad_norm_clip: 1.0
+  learn_entropy: True
+  entropy_learning_rate: 3.e-4
+  initial_entropy_value: 0.2
   state_preprocessor: "RunningStandardScaler"
   value_preprocessor: "RunningStandardScaler"
-  rewards_shaper_scale: 0.01
+  rewards_shaper: 0.01
   # logging and checkpoint
   experiment:
     directory: "sac_lift"
