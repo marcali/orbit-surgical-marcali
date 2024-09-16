@@ -177,7 +177,7 @@ def main():
         models["value"] = models["policy"]
 
     #memory_size = experiment_cfg["agent"]["rollouts"]  # memory_size is the agent's number of rollouts
-    memory = RandomMemory(memory_size=2000, num_envs=env.num_envs, device=env.device)
+    memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=env.device)
 
     # configure and instantiate sac agent
     agent_cfg = SAC_DEFAULT_CONFIG.copy()
