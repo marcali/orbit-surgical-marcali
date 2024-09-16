@@ -9,6 +9,7 @@ Script to play a checkpoint of an RL agent from skrl.
 Visit the skrl documentation (https://skrl.readthedocs.io) to see the examples structured in
 a more user-friendly way.
 """
+# ${IsaacLab_PATH}/isaaclab.sh -p source/standalone/workflows/skrl/play_sac.py --task Isaac-Lift-Needle-PSM-IK-Rel-SAC-Play-v0  --num_envs 1 --checkpoint logs/skrl/sac_lift/2024-09-16_17-15-43/checkpoints/25200.pt
 
 from __future__ import annotations
 
@@ -17,11 +18,10 @@ from __future__ import annotations
 
 import argparse
 
-from omni.isaac.orbit.app import AppLauncher
+from omni.isaac.lab.app import AppLauncher
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Play a checkpoint of an RL agent from skrl.")
-parser.add_argument("--cpu", action="store_true", default=False, help="Use CPU pipeline.")
 parser.add_argument(
     "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
 )
@@ -46,16 +46,17 @@ import torch
 from skrl.agents.torch.sac import SAC, SAC_DEFAULT_CONFIG
 from skrl.utils.model_instantiators.torch import deterministic_model, gaussian_model, shared_model
 
-import omni.isaac.orbit_tasks  # noqa: F401
-from omni.isaac.orbit_tasks.utils import get_checkpoint_path, load_cfg_from_registry, parse_env_cfg
-from omni.isaac.orbit_tasks.utils.wrappers.skrl import SkrlVecEnvWrapper, process_skrl_cfg
+import omni.isaac.lab_tasks  # noqa: F401
+import orbit.surgical.tasks  # noqa: F401
+from omni.isaac.lab_tasks.utils import get_checkpoint_path, load_cfg_from_registry, parse_env_cfg
+from omni.isaac.lab_tasks.utils.wrappers.skrl import SkrlVecEnvWrapper, process_skrl_cfg
 
 
 def main():
     """Play with skrl agent."""
     # parse env configuration
     env_cfg = parse_env_cfg(
-        args_cli.task, use_gpu=not args_cli.cpu, num_envs=args_cli.num_envs, use_fabric=not args_cli.disable_fabric
+        args_cli.task, device=args_cli.device, num_envs=args_cli.num_envs, use_fabric=not args_cli.disable_fabric
     )
     experiment_cfg = load_cfg_from_registry(args_cli.task, "skrl_cfg_entry_point")
 
@@ -121,7 +122,6 @@ def main():
     agent_cfg.update(process_skrl_cfg(experiment_cfg["agent"]))
 
     agent_cfg["state_preprocessor_kwargs"].update({"size": env.observation_space, "device": env.device})
-    agent_cfg["value_preprocessor_kwargs"].update({"size": 1, "device": env.device})
     agent_cfg["experiment"]["write_interval"] = 0  # don't log to Tensorboard
     agent_cfg["experiment"]["checkpoint_interval"] = 0  # don't generate checkpoints
 

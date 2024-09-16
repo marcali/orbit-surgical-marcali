@@ -108,3 +108,14 @@ gym.register(
     },
     disable_env_checker=True,
 )
+
+gym.register(
+    id="Isaac-Lift-Needle-PSM-IK-Rel-SAC-Play-v0",
+    entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": joint_pos_env_cfg.NeedleLiftEnvCfg_PLAY,
+        
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_sac_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
