@@ -216,14 +216,14 @@ class RewardsCfg:
     # best result: no reach, lift weight 15, dt 0.01, 5.sec
     lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.03}, weight=15.0)
 
-    # sd 0.3
+    # sd 0.3, best weight 16.0
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.3, "minimal_height": 0.03, "command_name": "object_pose"},
         weight=16.0,
     )
 
-    # sd 0.05
+    # sd 0.05, best weight 5.0
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.05, "minimal_height": 0.03, "command_name": "object_pose"},
@@ -231,27 +231,32 @@ class RewardsCfg:
     )
 
     # action penalty
+    #best weight -1e-3
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
     # penalized agent for taking large actions. encourages to take small controlled actions
     #action_l2 = RewTerm(func=mdp.action_l2, weight=-0.001)
 
+    #best weight -1e-2
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-1e-4,
+        weight=-1e-2,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
     # align_ee_handle = RewTerm(func=mdp.align_ee_handle, weight=0.5)
 
-    #object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
+    #best weight -2.0
+    object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
 
-    # joint_deviation_hip = RewTerm(
-    #     func=mdp.joint_deviation_l1,
-    #     weight=-0.01,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
-    # )
+    #best weight -0.01
+    joint_deviation_hip = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-0.01,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
+    )
     
-    #applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
+    #best weight -0.01
+    applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -295,18 +300,22 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
 
-    # action_rate2 = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
-    # )
+    #best weight -1.0
+    action_rate2 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
+    )
+
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
     # )
 
-    # joint_vel2 = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1.0, "num_steps": 15000}
-    # )
+    #best weight -1.0
+    joint_vel2 = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1.0, "num_steps": 15000}
+    )
 
-    #torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -0.1, "num_steps": 15000})
+    #best weight -0.1
+    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -0.1, "num_steps": 15000})
     #does nothing for rsl rl and kind of impreves for slrl
     # object_moving = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 20000}
