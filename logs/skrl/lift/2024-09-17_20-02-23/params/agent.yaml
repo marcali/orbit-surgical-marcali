@@ -9,10 +9,12 @@ models:
     max_log_std: 2.0
     input_shape: Shape.STATES
     hiddens:
+    - 512
     - 256
     - 128
     - 64
     hidden_activation:
+    - elu
     - elu
     - elu
     - elu
@@ -34,11 +36,11 @@ models:
     output_activation: ''
     output_scale: 1.0
 agent:
-  rollouts: 16
-  learning_epochs: 8
-  mini_batches: 8
+  rollouts: 32
+  learning_epochs: 16
+  mini_batches: 16
   discount_factor: 0.99
-  lambda: 0.95
+  lambda: 0.99
   learning_rate: 0.0003
   learning_rate_scheduler: KLAdaptiveLR
   learning_rate_scheduler_kwargs:
@@ -59,7 +61,7 @@ agent:
   rewards_shaper_scale: 0.01
   experiment:
     directory: /home/ubuntu/orbit-surgical-marcali/logs/skrl/lift
-    experiment_name: 2024-09-13_15-49-09
+    experiment_name: 2024-09-17_20-02-23
     write_interval: 120
     checkpoint_interval: 1200
 trainer:
