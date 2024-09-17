@@ -147,7 +147,6 @@ def main():
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
-    #rewards = torch.tensor([0, 0, 0, 0])
     # simulate environment
     while simulation_app.is_running():
         # run everything in inference mode
@@ -156,7 +155,6 @@ def main():
             actions = policy(obs)
             # env stepping
             obs, rew, dones, extra = env.step(actions)
-            #rewards += rew
             timestep += 1
             log_reward(timestep, rew, dones, extra, log_performance_path)
             if args_cli.video:
