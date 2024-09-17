@@ -42,6 +42,7 @@ simulation_app = app_launcher.app
 import gymnasium as gym
 import os
 import torch
+import csv
 
 from skrl.agents.torch.ppo import PPO, PPO_DEFAULT_CONFIG
 from skrl.utils.model_instantiators.torch import deterministic_model, gaussian_model, shared_model
@@ -122,6 +123,35 @@ def main():
     log_root_path = os.path.join("logs", "skrl", experiment_cfg["agent"]["experiment"]["directory"])
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
+    
+    # Logging rewards
+    log_performance_dir = os.path.abspath(log_root_path)
+    log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
+    print(f"[INFO] Logging RESULTS in directory: {log_root_path}")
+
+    def initialize_csv(path):
+        if not os.path.exists(path):
+            with open(path, "w", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["Step", "Reward"])
+    
+    def log_reward(step, reward, term, time_out, extra, path):
+        # Convert the tensor to a list
+        reward_list = reward.tolist()
+        dones_list = term.tolist()
+        
+        # Flatten the list if it contains nested lists
+        #flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
+        flat_dones_list = [item for sublist in dones_list for item in sublist] if isinstance(dones_list[0], list) else dones_list
+        #print(f"Step: {step}, Reward: {flat_reward_list}")
+        print(f"Step: {step}, Extra: {extra}")
+        print(f"Step: {step}, Dones: {flat_dones_list}")
+        # Write the step and flattened reward list to the CSV file
+        # with open(path, "a", newline="") as csvfile:
+        #     writer = csv.writer(csvfile)
+        #     writer.writerow([step] + flat_reward_list)
+    
+    initialize_csv(log_performance_path)
     # get checkpoint path
     if args_cli.checkpoint:
         resume_path = os.path.abspath(args_cli.checkpoint)
@@ -136,6 +166,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
+    timestep = 0
     obs, _ = env.reset()
     # simulate environment
     while simulation_app.is_running():
@@ -144,15 +175,14 @@ def main():
             # agent stepping
             actions = agent.act(obs, timestep=0, timesteps=0)[0]
             # env stepping
+            timestep += 1
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, dones, extra, log_performance_path)
+            log_reward(timestep, rew, term, time_out, extra, log_performance_path)
             if args_cli.video:
-                timestep += 1
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:
                     break
             
-
     # close the simulator
     env.close()
 
