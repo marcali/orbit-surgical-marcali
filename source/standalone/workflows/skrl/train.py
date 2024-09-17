@@ -12,6 +12,8 @@ a more user-friendly way.
 
 """Launch Isaac Sim Simulator first."""
 
+#${IsaacLab_PATH}/isaaclab.sh -p source/standalone/workflows/skrl/train.py --task Isaac-Lift-Needle-PSM-v0  --headless --video
+
 
 import argparse
 
