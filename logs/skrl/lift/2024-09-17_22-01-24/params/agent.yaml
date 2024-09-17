@@ -40,7 +40,7 @@ agent:
   learning_epochs: 16
   mini_batches: 16
   discount_factor: 0.99
-  lambda: 0.99
+  lambda: 0.95
   learning_rate: 0.0003
   learning_rate_scheduler: KLAdaptiveLR
   learning_rate_scheduler_kwargs:
@@ -61,7 +61,7 @@ agent:
   rewards_shaper_scale: 0.01
   experiment:
     directory: /home/ubuntu/orbit-surgical-marcali/logs/skrl/lift
-    experiment_name: 2024-09-17_20-02-23
+    experiment_name: 2024-09-17_22-01-24
     write_interval: 120
     checkpoint_interval: 1200
 trainer:
