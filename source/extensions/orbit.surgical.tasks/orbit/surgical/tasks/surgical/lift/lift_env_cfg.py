@@ -110,8 +110,15 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
+
+        # object position and velocity
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
+
+        # obstacle position and velocity
         obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
+        obstacle_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("obstacle")})
+
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
@@ -273,7 +280,7 @@ class RewardsCfg:
     
     # collision penalty
     shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
-    object_collision = RewTerm(func=mdp.dynamic_penalty, params={}, weight=-0.2)
+    object_collision = RewTerm(func=mdp.dynamic_penalty, params={"std": 0.3}, weight=-0.2)
 
 
 @configclass

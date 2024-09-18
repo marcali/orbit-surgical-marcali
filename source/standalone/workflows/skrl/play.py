@@ -141,9 +141,10 @@ def main():
         dones_list = term.tolist()
         
         # Flatten the list if it contains nested lists
-        #flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
+        flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
         flat_dones_list = [item for sublist in dones_list for item in sublist] if isinstance(dones_list[0], list) else dones_list
         #print(f"Step: {step}, Reward: {flat_reward_list}")
+        print(f"Step: {step}, Reward: {reward}")
         print(f"Step: {step}, Extra: {extra}")
         print(f"Step: {step}, Dones: {flat_dones_list}")
         # Write the step and flattened reward list to the CSV file

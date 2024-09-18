@@ -12,7 +12,8 @@ from typing import TYPE_CHECKING
 
 from omni.isaac.lab.assets import RigidObject
 from omni.isaac.lab.assets.rigid_object.rigid_object_data import RigidObjectData
-from omni.isaac.lab.managers import SceneEntityCfg
+from omni.isaac.lab.managers import SceneEntityCfg, ManagerTermBase
+from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.math import combine_frame_transforms, matrix_from_quat
 
@@ -260,10 +261,11 @@ def dynamic_penalty(
 
 
 def collision_penalty(
-    env: ManagerBasedRLEnv, obstacle_cfg: SceneEntityCfg = (SceneEntityCfg("obstacle"),)
+    env: ManagerBasedRLEnv, obstacle_cfg: SceneEntityCfg = (SceneEntityCfg("obstacle"))
 ) -> torch.Tensor:
-    obst_vel = obstacle_cfg.data.root_lin_vel_w
-    obst_delta = obstacle_cfg.data.root_pos_w - obstacle_cfg.data.root_pos_w
+    object: RigidObject = env.scene[obstacle_cfg.name]
+    obst_vel = object.data.root_lin_vel_w
+    obst_delta = object.data.root_pos_w - object.data.root_pos_w
     moved = torch.where(
         torch.norm(obst_delta, dim=-1, p=2) + torch.norm(obst_vel, dim=-1, p=2)
         > 0.005,
@@ -275,3 +277,79 @@ def collision_penalty(
     # log_to_csv(os.path.join(log_root_path, "undesired_obstacle_contacts.csv"), modified_reward.tolist())
 
     return moved
+
+class shelf_Collision(ManagerTermBase):
+    def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
+        super().__init__(cfg, env)
+        object_cfg = SceneEntityCfg("object")
+        ee_frame_cfg = SceneEntityCfg("ee_frame")
+        obstacele_cfg = SceneEntityCfg("obstacele")
+
+        self.object: RigidObject = env.scene[object_cfg.name]
+        self.ee: FrameTransformer = env.scene[ee_frame_cfg.name]
+        self.obstacle: RigidObject = env.scene[obstacele_cfg.name]
+        self.std = 0.3
+
+        self.initial_obst_pos = self.obstacle.data.root_pos_w.clone()
+
+        #self.target_last_w = self.object.data.root_pos_w.clone()
+
+    
+    def __call__(self, env: ManagerBasedRLEnv):
+
+        collision = self.collision_penalty(env)
+        collision_dynamic = self.dynamic_penalty(env)
+        # print(self._shelf.)
+        return collision + collision_dynamic
+
+    def collision_penalty(
+        self,
+        env: ManagerBasedRLEnv
+    ) -> torch.Tensor:
+        obst_vel = self.object.data.root_lin_vel_w
+        obst_delta = self.object.data.root_pos_w - self.initial_obst_pos
+        moved = torch.where(
+            torch.norm(obst_delta, dim=-1, p=2) + torch.norm(obst_vel, dim=-1, p=2)
+            > 0.005,
+            1.0,
+            0.0,
+        )
+        # multiplied by weight for logging
+        # modified_reward = moved * 1
+        # log_to_csv(os.path.join(log_root_path, "undesired_obstacle_contacts.csv"), modified_reward.tolist())
+
+        return moved
+
+    def dynamic_penalty(
+        self,
+        env: ManagerBasedRLEnv,
+    ) -> torch.Tensor:
+        """Apply a dynamic penalty for the task of picking a needle while avoiding an obstacle."""
+
+        # Position of the needle and obstacle
+        needle_pos_w = self.object.data.root_pos_w
+        obstacle_pos_w = self.obstacle.data.root_pos_w
+        ee_w = self.ee.data.target_pos_w[..., 0, :]
+
+        # Compute the distance between the end-effector and the needle
+        object_ee_distance = torch.norm(needle_pos_w - ee_w, dim=1)
+        # Reward the agent for approaching the needle
+        reach_reward = 1 - torch.tanh(object_ee_distance / self.std)
+
+        # Compute the distance between the end-effector and the obstacle
+        obstacle_ee_distance = torch.norm(obstacle_pos_w - ee_w, dim=1)
+
+        # Define a threshold for proximity to the obstacle (closer than 0.1 meters is penalized)
+        obstacle_threshold = 0.1
+        # Penalty increases as the end-effector gets closer to the obstacle
+        obstacle_penalty = torch.where(obstacle_ee_distance < obstacle_threshold,
+                                    1 - (obstacle_ee_distance / obstacle_threshold), 
+                                    torch.tensor(0.0))
+
+        # Dynamic penalty combines reward for reaching the needle and penalty for approaching the obstacle
+        total_penalty = reach_reward - 5 * obstacle_penalty
+
+        # Clamp the total penalty to ensure it's within a valid range
+        total_penalty = torch.clamp(total_penalty, -1, 1)
+
+        return total_penalty
