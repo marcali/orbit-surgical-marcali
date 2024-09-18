@@ -71,6 +71,12 @@ import orbit.surgical.tasks  # noqa: F401
 
 def main():
     """Train with skrl agent."""
+    def process_skrl_cfg_with_dropout(cfg):
+        # Custom function to handle dropout in the configuration
+        parameters = process_skrl_cfg(cfg)
+        if 'dropout_probability' in cfg:
+            parameters['dropout_probability'] = cfg['dropout_probability']
+        return parameters
     # read the seed from command line
     args_cli_seed = args_cli.seed
 
@@ -134,16 +140,16 @@ def main():
     # non-shared models
     if experiment_cfg["models"]["separate"]:
         models["policy"] = gaussian_model(
-            observation_space=env.observation_space,
-            action_space=env.action_space,
-            device=env.device,
-            **process_skrl_cfg(experiment_cfg["models"]["policy"]),
+        observation_space=env.observation_space,
+        action_space=env.action_space,
+        device=env.device,
+        **process_skrl_cfg_with_dropout(experiment_cfg["models"]["policy"]),
         )
         models["value"] = deterministic_model(
-            observation_space=env.observation_space,
-            action_space=env.action_space,
-            device=env.device,
-            **process_skrl_cfg(experiment_cfg["models"]["value"]),
+        observation_space=env.observation_space,
+        action_space=env.action_space,
+        device=env.device,
+        **process_skrl_cfg_with_dropout(experiment_cfg["models"]["value"]),
         )
     # shared models
     else:
