@@ -43,7 +43,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
         # obstacle: will be populated by agent env cfg
-    #obstacle: RigidObjectCfg = MISSING
+    obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -111,6 +111,7 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
@@ -269,16 +270,10 @@ class RewardsCfg:
     #         "asset_cfg2": SceneEntityCfg("robot", joint_names=["psm_tool_gripper2_joint"]),
     #     },
     # )
-    # undesired_contacts = RewTerm(
-    #     func=mdp.undesired_obstacle_contacts,
-    #     weight=-1.0,
-    #     params={"sensor_cfg": SceneEntityCfg("contact_forces"), "threshold": 1.0},
-    # )
     
     # collision penalty
-    # shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
-    # object_collision = RewTerm(func=mdp.object_collision_pentaly, params={}, weight=-1.0)
-    # collision = RewTerm(func=mdp.collision_penalty, weight=-1.0)
+    shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
+    object_collision = RewTerm(func=mdp.dynamic_penalty, params={}, weight=-0.2)
 
 
 @configclass

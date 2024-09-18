@@ -118,24 +118,6 @@ def object_velocity(
     return penalty
 
 
-def collision_penalty(
-    env: ManagerBasedRLEnv, obstacle_cfg: SceneEntityCfg = (SceneEntityCfg("obstacle"),)
-) -> torch.Tensor:
-    shelf_vel = obstacle_cfg.data.root_lin_vel_w
-    shelf_delta = obstacle_cfg.data.root_pos_w - obstacle_cfg.data.root_pos_w
-    moved = torch.where(
-        torch.norm(shelf_delta, dim=-1, p=2) + torch.norm(shelf_vel, dim=-1, p=2)
-        > 0.005,
-        1.0,
-        0.0,
-    )
-    # multiplied by weight for logging
-    # modified_reward = moved * 1
-    # log_to_csv(os.path.join(log_root_path, "undesired_obstacle_contacts.csv"), modified_reward.tolist())
-
-    return moved
-
-
 def align_ee_handle(
     env: ManagerBasedRLEnv,
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -233,6 +215,7 @@ def grasp_needle(
 
     return total_reward
 
+############################### collision
 def dynamic_penalty(
     env: ManagerBasedRLEnv,
     std: float,
@@ -275,3 +258,20 @@ def dynamic_penalty(
 
     return total_penalty
 
+
+def collision_penalty(
+    env: ManagerBasedRLEnv, obstacle_cfg: SceneEntityCfg = (SceneEntityCfg("obstacle"),)
+) -> torch.Tensor:
+    obst_vel = obstacle_cfg.data.root_lin_vel_w
+    obst_delta = obstacle_cfg.data.root_pos_w - obstacle_cfg.data.root_pos_w
+    moved = torch.where(
+        torch.norm(obst_delta, dim=-1, p=2) + torch.norm(obst_vel, dim=-1, p=2)
+        > 0.005,
+        1.0,
+        0.0,
+    )
+    # multiplied by weight for logging
+    # modified_reward = moved * 1
+    # log_to_csv(os.path.join(log_root_path, "undesired_obstacle_contacts.csv"), modified_reward.tolist())
+
+    return moved
