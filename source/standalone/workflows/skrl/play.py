@@ -125,7 +125,9 @@ def main():
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
     
     # Logging rewards
-    log_performance_dir = os.path.abspath(log_root_path)
+    run_num = "1"
+    model_path = os.path.abspath(args_cli.checkpoint)
+    log_performance_dir = os.path.join(log_root_path, model_path)
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
     print(f"[INFO] Logging RESULTS in directory: {log_root_path}")
 
@@ -135,22 +137,52 @@ def main():
                 writer = csv.writer(csvfile)
                 writer.writerow(["Step", "Reward"])
     
-    def log_reward(step, reward, term, time_out, extra, path):
-        # Convert the tensor to a list
-        reward_list = reward.tolist()
-        dones_list = term.tolist()
-        
+    def log_reward(step, reward, term, time_out, extra, path, run_num):
+
+        # Convert tensors to scalars or lists
+        if isinstance(reward, torch.Tensor):
+            reward_value = reward.item() if reward.numel() == 1 else reward.tolist()
+        else:
+            reward_value = reward
+
+        if isinstance(term, torch.Tensor):
+            dones_list = term.tolist()
+        else:
+            dones_list = term
+
         # Flatten the list if it contains nested lists
-        flat_reward_list = [item for sublist in reward_list for item in sublist] if isinstance(reward_list[0], list) else reward_list
         flat_dones_list = [item for sublist in dones_list for item in sublist] if isinstance(dones_list[0], list) else dones_list
-        #print(f"Step: {step}, Reward: {flat_reward_list}")
-        print(f"Step: {step}, Reward: {reward}")
-        print(f"Step: {step}, Extra: {extra}")
-        print(f"Step: {step}, Dones: {flat_dones_list}")
-        # Write the step and flattened reward list to the CSV file
-        # with open(path, "a", newline="") as csvfile:
-        #     writer = csv.writer(csvfile)
-        #     writer.writerow([step] + flat_reward_list)
+        dones_value = flat_dones_list[0] if len(flat_dones_list) == 1 else flat_dones_list
+
+        # Create a dict to hold all data
+        log_data = {}
+        log_data['Run'] = run_num  # Optional: Include run number if needed
+        log_data['Step'] = step
+        log_data['Reward'] = reward_value
+        log_data['Dones'] = dones_value
+
+        # Extract extra['log'] items
+        if 'log' in extra:
+            for key, value in extra['log'].items():
+                # Convert tensors to scalars or lists
+                if isinstance(value, torch.Tensor):
+                    value = value.item() if value.numel() == 1 else value.tolist()
+                log_data[key] = value
+
+        # If the CSV file doesn't exist or is empty, write the headers
+        file_exists = os.path.isfile(path)
+        write_headers = not file_exists or os.path.getsize(path) == 0
+
+        with open(path, "a", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            if write_headers:
+                # Write headers
+                headers = list(log_data.keys())
+                writer.writerow(headers)
+            # Write data
+            row = [log_data[key] for key in log_data.keys()]
+            writer.writerow(row)
+
     
     initialize_csv(log_performance_path)
     # get checkpoint path
@@ -167,6 +199,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
+    run_num = "run 1"
     timestep = 0
     obs, _ = env.reset()
     # simulate environment
@@ -178,7 +211,7 @@ def main():
             # env stepping
             timestep += 1
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, term, time_out, extra, log_performance_path)
+            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

@@ -15,10 +15,20 @@ models:
     # hiddens: [256, 128, 64]
     # hidden_activation: ["elu", "elu", "elu"]
     hiddens: [512, 256, 128, 64]
+    #hidden_activation: ["elu", "Dropout", "elu", "Dropout", "elu", "elu"]
     hidden_activation: ["elu", "elu", "elu", "elu"]
     output_shape: "Shape.ACTIONS"
     output_activation: ""
     output_scale: 1.0
+  # value:
+  #   clip_actions: False
+  #   input_shape: "Shape.STATES"
+  #   hiddens: [512, 256, 128, 64]
+  #   hidden_activation: ["elu", "Dropout", "elu", "Dropout", "elu", "elu"]
+  #   dropout_probability: 0.1  # Adjust as needed
+  #   output_shape: "Shape.ONE"
+  #   output_activation: ""
+  #   output_scale: 1.0
   value:  # see skrl.utils.model_instantiators.torch.deterministic_model for parameter details
     clip_actions: False
     input_shape: "Shape.STATES"
@@ -62,6 +72,13 @@ agent:
   rewards_shaper_scale: 0.01
   #rewards_shaper_scale: 0.1
   # logging and checkpoint
+
+  # policy_optimizer: "Adam"
+  #   policy_optimizer_kwargs:
+  #     weight_decay: 0.01
+  # value_optimizer: "Adam"
+  #   value_optimizer_kwargs:
+  #     weight_decay: 0.01
   experiment:
     # directory: "lift"
     directory: "obstacle_lift"

@@ -65,20 +65,34 @@ def object_ee_distance(
     env: ManagerBasedRLEnv,
     std: float,
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
-    ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
+    ee_frame_receiving_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame_receiving"),
+    ee_frame_testing_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame_testing"),
 ) -> torch.Tensor:
-    """Reward the agent for reaching the object using tanh-kernel."""
-    # extract the used quantities (to enable type-hinting)
+    """Reward the agent for reaching the object using tanh-kernel with two robotic arms."""
+    # Extract the used quantities (to enable type-hinting)
     object: RigidObject = env.scene[object_cfg.name]
-    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+    ee_frame_receiving: FrameTransformer = env.scene[ee_frame_receiving_cfg.name]
+    ee_frame_testing: FrameTransformer = env.scene[ee_frame_testing_cfg.name]
+    
     # Target object position: (num_envs, 3)
     cube_pos_w = object.data.root_pos_w
-    # End-effector position: (num_envs, 3)
-    ee_w = ee_frame.data.target_pos_w[..., 0, :]
-    # Distance of the end-effector to the object: (num_envs,)
-    object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
+    
+    # End-effector positions: (num_envs, 3)
+    ee_w_receiving = ee_frame_receiving.data.target_pos_w[..., 0, :]
+    ee_w_testing = ee_frame_testing.data.target_pos_w[..., 0, :]
+    
+    # Distances of the end-effectors to the object: (num_envs,)
+    distance_receiving = torch.norm(cube_pos_w - ee_w_receiving, dim=1)
+    distance_testing = torch.norm(cube_pos_w - ee_w_testing, dim=1)
+    
+    # Choose the minimum distance
+    min_distance = torch.min(distance_receiving, distance_testing)
+    
+    # Compute the reward using the tanh-kernel
+    reward = 1 - torch.tanh(min_distance / std)
+    
+    return reward
 
-    return 1 - torch.tanh(object_ee_distance / std)
 
 
 def object_goal_distance(

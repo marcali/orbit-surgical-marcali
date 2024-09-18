@@ -22,6 +22,7 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.PSMReachEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.PSMReachPPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
 
@@ -32,6 +33,7 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.PSMReachEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.PSMReachPPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
 

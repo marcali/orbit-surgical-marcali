@@ -251,8 +251,6 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
-    # align_ee_handle = RewTerm(func=mdp.align_ee_handle, weight=0.5)
-
     #best weight -2.0
     object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
 
@@ -266,6 +264,7 @@ class RewardsCfg:
     #best weight -0.01
     applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
+    collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-1.0)
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
     #     weight=5.0,
@@ -279,7 +278,7 @@ class RewardsCfg:
     # )
     
     # collision penalty
-    shelf_collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.2)
+
     # shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
     # object_collision = RewTerm(func=mdp.dynamic_penalty, params={"std": 0.3}, weight=-0.2)
 
