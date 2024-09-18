@@ -43,7 +43,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
         # obstacle: will be populated by agent env cfg
-    obstacle: RigidObjectCfg = MISSING
+    #obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -116,8 +116,8 @@ class ObservationsCfg:
         object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
 
         # obstacle position and velocity
-        obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
-        obstacle_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("obstacle")})
+        #obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
+        #obstacle_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("obstacle")})
 
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
@@ -264,7 +264,7 @@ class RewardsCfg:
     #best weight -0.01
     applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
-    collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-1.0)
+    #collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.3)
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
     #     weight=5.0,
