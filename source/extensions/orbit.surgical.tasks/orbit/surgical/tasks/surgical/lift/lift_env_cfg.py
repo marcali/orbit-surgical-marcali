@@ -279,8 +279,9 @@ class RewardsCfg:
     # )
     
     # collision penalty
-    shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
-    object_collision = RewTerm(func=mdp.dynamic_penalty, params={"std": 0.3}, weight=-0.2)
+    shelf_collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.2)
+    # shelf_collision = RewTerm(func=mdp.collision_penalty, params={}, weight=-0.2)
+    # object_collision = RewTerm(func=mdp.dynamic_penalty, params={"std": 0.3}, weight=-0.2)
 
 
 @configclass

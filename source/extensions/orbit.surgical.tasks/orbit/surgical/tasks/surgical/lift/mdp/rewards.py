@@ -278,16 +278,16 @@ def collision_penalty(
 
     return moved
 
-class shelf_Collision(ManagerTermBase):
+class object_Collision(ManagerTermBase):
     def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
         super().__init__(cfg, env)
         object_cfg = SceneEntityCfg("object")
         ee_frame_cfg = SceneEntityCfg("ee_frame")
-        obstacele_cfg = SceneEntityCfg("obstacele")
+        obstacle_cfg = SceneEntityCfg("obstacle")
 
         self.object: RigidObject = env.scene[object_cfg.name]
         self.ee: FrameTransformer = env.scene[ee_frame_cfg.name]
-        self.obstacle: RigidObject = env.scene[obstacele_cfg.name]
+        self.obstacle: RigidObject = env.scene[obstacle_cfg.name]
         self.std = 0.3
 
         self.initial_obst_pos = self.obstacle.data.root_pos_w.clone()
