@@ -43,6 +43,7 @@ import gymnasium as gym
 import os
 import torch
 import csv
+import pandas as pd
 
 from skrl.agents.torch.ppo import PPO, PPO_DEFAULT_CONFIG
 from skrl.utils.model_instantiators.torch import deterministic_model, gaussian_model, shared_model
@@ -135,53 +136,54 @@ def main():
         if not os.path.exists(path):
             with open(path, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow(["Step", "Reward"])
+                writer.writerow(["Run","Step", "Reward", "Dones"])
     
+
     def log_reward(step, reward, term, time_out, extra, path, run_num):
-
         # Convert tensors to scalars or lists
-        if isinstance(reward, torch.Tensor):
-            reward_value = reward.item() if reward.numel() == 1 else reward.tolist()
+        def convert_value(value):
+            if isinstance(value, torch.Tensor):
+                return value.item() if value.numel() == 1 else value.tolist()
+            return value
+
+        # Flatten the extra dictionary
+        def flatten_dict(d, parent_key='', sep='/'):
+            items = {}
+            for k, v in d.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    items.update(flatten_dict(v, new_key, sep=sep))
+                else:
+                    items[new_key] = convert_value(v)
+            return items
+
+    # Prepare the data
+        log_data = {
+            'Run': run_num,
+            'Step': step,
+            'Reward': convert_value(reward),
+            'Dones': convert_value(term)
+        }
+
+        if extra:
+            extra_flat = flatten_dict(extra)
+            log_data.update(extra_flat)
+
+        # Convert log_data to DataFrame
+        df_new = pd.DataFrame([log_data])
+
+        # Check if the CSV file exists
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            df_existing = pd.read_csv(path)
+            # Combine the existing and new DataFrames, aligning columns
+            df_combined = pd.concat([df_existing, df_new], ignore_index=True, sort=False)
+            # Fill NaN values with empty strings or zeros as appropriate
+            df_combined = df_combined.fillna('')
         else:
-            reward_value = reward
+            df_combined = df_new
 
-        if isinstance(term, torch.Tensor):
-            dones_list = term.tolist()
-        else:
-            dones_list = term
-
-        # Flatten the list if it contains nested lists
-        flat_dones_list = [item for sublist in dones_list for item in sublist] if isinstance(dones_list[0], list) else dones_list
-        dones_value = flat_dones_list[0] if len(flat_dones_list) == 1 else flat_dones_list
-
-        # Create a dict to hold all data
-        log_data = {}
-        log_data['Run'] = run_num  # Optional: Include run number if needed
-        log_data['Step'] = step
-        log_data['Reward'] = reward_value
-        log_data['Dones'] = dones_value
-
-        # Extract extra['log'] items
-        if 'log' in extra:
-            for key, value in extra['log'].items():
-                # Convert tensors to scalars or lists
-                if isinstance(value, torch.Tensor):
-                    value = value.item() if value.numel() == 1 else value.tolist()
-                log_data[key] = value
-
-        # If the CSV file doesn't exist or is empty, write the headers
-        file_exists = os.path.isfile(path)
-        write_headers = not file_exists or os.path.getsize(path) == 0
-
-        with open(path, "a", newline="") as csvfile:
-            writer = csv.writer(csvfile)
-            if write_headers:
-                # Write headers
-                headers = list(log_data.keys())
-                writer.writerow(headers)
-            # Write data
-            row = [log_data[key] for key in log_data.keys()]
-            writer.writerow(row)
+        # Write the combined DataFrame back to CSV
+        df_combined.to_csv(path, index=False)
 
     
     initialize_csv(log_performance_path)

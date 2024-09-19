@@ -99,10 +99,6 @@ def object_velocity(
     object_lin_vel_w = object.data.root_lin_vel_w
     object_lin_vel_norm = torch.norm(object_lin_vel_w, dim=-1, p=2)
     penalty = torch.where(object_lin_vel_norm > 1, 1, 0)
-    # print("penalty object velocity", penalty)
-    # multiplied by weight for logging
-    # modified_reward = penalty * 1
-    # log_to_csv(os.path.join(log_root_path, "object_velocity.csv"), modified_reward.tolist())
     return penalty
 
 
