@@ -113,7 +113,7 @@ class ObservationsCfg:
 
         # object position and velocity
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
+        #object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
 
         # obstacle position and velocity
         #obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
@@ -265,6 +265,7 @@ class RewardsCfg:
     applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
     #collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.3)
+    
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
     #     weight=5.0,
