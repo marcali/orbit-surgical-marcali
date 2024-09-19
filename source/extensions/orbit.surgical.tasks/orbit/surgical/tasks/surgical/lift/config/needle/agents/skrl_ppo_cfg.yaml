@@ -19,22 +19,22 @@ models:
     output_shape: "Shape.ACTIONS"
     output_activation: ""
     output_scale: 1.0
-  value:
+ # value:
+    # clip_actions: False
+    # input_shape: "Shape.STATES"
+    # hiddens: [512, 256, 128, 64]
+    # hidden_activation: ["elu",  "elu", "elu", "elu"]
+    # output_shape: "Shape.ONE"
+    # output_activation: ""
+    # output_scale: 1.0
+  value:  # see skrl.utils.model_instantiators.torch.deterministic_model for parameter details
     clip_actions: False
     input_shape: "Shape.STATES"
-    hiddens: [512, 256, 128, 64]
-    hidden_activation: ["elu",  "elu", "elu", "elu"]
+    hiddens: [256, 128, 64]
+    hidden_activation: ["elu", "elu", "elu"]
     output_shape: "Shape.ONE"
     output_activation: ""
     output_scale: 1.0
-  # value:  # see skrl.utils.model_instantiators.torch.deterministic_model for parameter details
-  #   clip_actions: False
-  #   input_shape: "Shape.STATES"
-  #   hiddens: [256, 128, 64]
-  #   hidden_activation: ["elu", "elu", "elu"]
-  #   output_shape: "Shape.ONE"
-  #   output_activation: ""
-  #   output_scale: 1.0
 
 
 # PPO agent configuration (field names are from PPO_DEFAULT_CONFIG)

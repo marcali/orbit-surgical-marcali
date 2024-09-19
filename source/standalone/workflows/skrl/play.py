@@ -127,7 +127,7 @@ def main():
     # Logging rewards
     run_num = "1"
     model_path = os.path.abspath(args_cli.checkpoint)
-    log_performance_dir = os.path.join(log_root_path, model_path)
+    log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
     print(f"[INFO] Logging RESULTS in directory: {log_root_path}")
 

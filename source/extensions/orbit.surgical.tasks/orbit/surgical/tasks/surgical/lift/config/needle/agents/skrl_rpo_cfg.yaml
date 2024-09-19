@@ -17,8 +17,8 @@ models:
   value:
     clip_actions: False
     input_shape: "Shape.STATES"
-    hiddens: [256, 128, 64]
-    hidden_activation: ["elu", "elu", "elu"]
+    hiddens: [512, 256, 128, 64]
+    hidden_activation: ["elu",  "elu", "elu", "elu"]
     output_shape: "Shape.ONE"
     output_activation: ""
     output_scale: 1.0
@@ -49,18 +49,14 @@ agent:
   kl_threshold: 0
 
   # RPO-specific settings
-  rho: 0.5  # Regularization coefficient
-  beta: 0.0  # Penalty coefficient
-  policy_weight_decay: 0.01
-  value_weight_decay: 0.0
-  zero_policy_gradients_across_episodes: False
+  alpha: 0.5
 
   # Reward shaping
   rewards_shaper_scale: 0.01
 
   # Logging and checkpoint
   experiment:
-    directory: "obstacle_lift_rpo"
+    directory: "lift_rpo"
     experiment_name: ""
     write_interval: 120
     checkpoint_interval: 1200
