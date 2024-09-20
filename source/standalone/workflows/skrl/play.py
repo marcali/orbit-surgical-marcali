@@ -33,6 +33,9 @@ AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
 args_cli = parser.parse_args()
 
+if args_cli.video:
+    args_cli.enable_cameras = True
+
 # launch omniverse app
 app_launcher = AppLauncher(args_cli)
 simulation_app = app_launcher.app
@@ -44,6 +47,8 @@ import os
 import torch
 import csv
 import pandas as pd
+
+from omni.isaac.lab.utils.dict import print_dict
 
 from skrl.agents.torch.ppo import PPO, PPO_DEFAULT_CONFIG
 from skrl.utils.model_instantiators.torch import deterministic_model, gaussian_model, shared_model
@@ -64,7 +69,9 @@ def main():
     experiment_cfg = load_cfg_from_registry(args_cli.task, "skrl_cfg_entry_point")
 
     # create isaac environment
-    env = gym.make(args_cli.task, cfg=env_cfg)
+    #env = gym.make(args_cli.task, cfg=env_cfg)
+    env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
+
     # wrap around environment for skrl
     env = SkrlVecEnvWrapper(env)  # same as: `wrap_env(env, wrapper="isaaclab")`
 
@@ -77,6 +84,11 @@ def main():
             observation_space=env.observation_space,
             action_space=env.action_space,
             device=env.device,
+            clip_actions=True,
+            clip_log_std=True,
+            initial_log_std=-20.0,
+            min_log_std=-20.0,
+            max_log_std=-20.0,
             **process_skrl_cfg(experiment_cfg["models"]["policy"]),
         )
         models["value"] = deterministic_model(
@@ -125,8 +137,27 @@ def main():
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
     
+    # get checkpoint path
+    if args_cli.checkpoint:
+        resume_path = os.path.abspath(args_cli.checkpoint)
+    else:
+        resume_path = get_checkpoint_path(log_root_path, other_dirs=["checkpoints"])
+    print(f"[INFO] Loading model checkpoint from: {resume_path}")
+    log_dir = os.path.dirname(os.path.dirname(resume_path))
+
+    if args_cli.video:
+        video_kwargs = {
+            "video_folder": os.path.join(log_dir, "videos", "play"),
+            "step_trigger": lambda step: step == 0,
+            "video_length": args_cli.video_length,
+            "disable_logger": True,
+        }
+        print("[INFO] Recording videos during training.")
+        print_dict(video_kwargs, nesting=4)
+        env = gym.wrappers.RecordVideo(env, **video_kwargs)
+    
     # Logging rewards
-    run_num = "1"
+    run_num = "2"
     model_path = os.path.abspath(args_cli.checkpoint)
     log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
@@ -187,12 +218,6 @@ def main():
 
     
     initialize_csv(log_performance_path)
-    # get checkpoint path
-    if args_cli.checkpoint:
-        resume_path = os.path.abspath(args_cli.checkpoint)
-    else:
-        resume_path = get_checkpoint_path(log_root_path, other_dirs=["checkpoints"])
-    print(f"[INFO] Loading model checkpoint from: {resume_path}")
 
     # initialize agent
     agent.init()
@@ -201,7 +226,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
-    run_num = "run 1"
+    run_num = "2"
     timestep = 0
     obs, _ = env.reset()
     # simulate environment

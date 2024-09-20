@@ -212,6 +212,16 @@ class EventCfg:
         },
     )
 
+    # reset_obstacle_position = EventTerm(
+    #     func=mdp.reset_root_state_uniform,
+    #     mode="reset",
+    #     params={
+    #         "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
+    #         "velocity_range": {},
+    #         "asset_cfg": SceneEntityCfg("obstcale", body_names="Object"),
+    #     },
+    # )
+
 
 @configclass
 class RewardsCfg:
@@ -257,7 +267,7 @@ class RewardsCfg:
     #best weight -0.01
     joint_deviation = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.01,
+        weight=-0.001,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
     )
     
@@ -311,6 +321,8 @@ class CurriculumCfg:
     action_rate2 = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
     )
+
+    collision = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -1.5, "num_steps": 15000})
 
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}

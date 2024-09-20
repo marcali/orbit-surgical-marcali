@@ -19,22 +19,22 @@ models:
     output_shape: "Shape.ACTIONS"
     output_activation: ""
     output_scale: 1.0
- # value:
-    # clip_actions: False
-    # input_shape: "Shape.STATES"
-    # hiddens: [512, 256, 128, 64]
-    # hidden_activation: ["elu",  "elu", "elu", "elu"]
-    # output_shape: "Shape.ONE"
-    # output_activation: ""
-    # output_scale: 1.0
-  value:  # see skrl.utils.model_instantiators.torch.deterministic_model for parameter details
+  value:
     clip_actions: False
     input_shape: "Shape.STATES"
-    hiddens: [256, 128, 64]
-    hidden_activation: ["elu", "elu", "elu"]
+    hiddens: [512, 256, 128, 64]
+    hidden_activation: ["elu",  "elu", "elu", "elu"]
     output_shape: "Shape.ONE"
     output_activation: ""
     output_scale: 1.0
+  # value:  # see skrl.utils.model_instantiators.torch.deterministic_model for parameter details
+  #   clip_actions: False
+  #   input_shape: "Shape.STATES"
+  #   hiddens: [256, 128, 64]
+  #   hidden_activation: ["elu", "elu", "elu"]
+  #   output_shape: "Shape.ONE"
+  #   output_activation: ""
+  #   output_scale: 1.0
 
 
 # PPO agent configuration (field names are from PPO_DEFAULT_CONFIG)
@@ -59,7 +59,6 @@ agent:
   random_timesteps: 0
   learning_starts: 0
   grad_norm_clip: 1.0
-  #grad_norm_clip: 1.0
   ratio_clip: 0.2
   value_clip: 0.2
   clip_predicted_values: True
@@ -73,7 +72,7 @@ agent:
 
   experiment:
     # directory: "lift"
-    directory: "lift"
+    directory: "obstacle_lift"
     experiment_name: ""
     write_interval: 120
     checkpoint_interval: 1200
