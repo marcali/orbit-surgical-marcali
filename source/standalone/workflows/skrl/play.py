@@ -68,9 +68,33 @@ def main():
     )
     experiment_cfg = load_cfg_from_registry(args_cli.task, "skrl_cfg_entry_point")
 
+    # specify directory for logging experiments (load checkpoint)
+    log_root_path = os.path.join("logs", "skrl", experiment_cfg["agent"]["experiment"]["directory"])
+    log_root_path = os.path.abspath(log_root_path)
+    print(f"[INFO] Loading experiment from directory: {log_root_path}")
+    
+    # get checkpoint path
+    if args_cli.checkpoint:
+        resume_path = os.path.abspath(args_cli.checkpoint)
+    else:
+        resume_path = get_checkpoint_path(log_root_path, other_dirs=["checkpoints"])
+    print(f"[INFO] Loading model checkpoint from: {resume_path}")
+    log_dir = os.path.dirname(os.path.dirname(resume_path))
+
     # create isaac environment
     #env = gym.make(args_cli.task, cfg=env_cfg)
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
+
+    if args_cli.video:
+        video_kwargs = {
+            "video_folder": os.path.join(log_dir, "videos", "play"),
+            "step_trigger": lambda step: step == 0,
+            "video_length": args_cli.video_length,
+            "disable_logger": True,
+        }
+        print("[INFO] Recording videos during training.")
+        print_dict(video_kwargs, nesting=4)
+        env = gym.wrappers.RecordVideo(env, **video_kwargs)
 
     # wrap around environment for skrl
     env = SkrlVecEnvWrapper(env)  # same as: `wrap_env(env, wrapper="isaaclab")`
@@ -132,32 +156,10 @@ def main():
         device=env.device,
     )
 
-    # specify directory for logging experiments (load checkpoint)
-    log_root_path = os.path.join("logs", "skrl", experiment_cfg["agent"]["experiment"]["directory"])
-    log_root_path = os.path.abspath(log_root_path)
-    print(f"[INFO] Loading experiment from directory: {log_root_path}")
-    
-    # get checkpoint path
-    if args_cli.checkpoint:
-        resume_path = os.path.abspath(args_cli.checkpoint)
-    else:
-        resume_path = get_checkpoint_path(log_root_path, other_dirs=["checkpoints"])
-    print(f"[INFO] Loading model checkpoint from: {resume_path}")
-    log_dir = os.path.dirname(os.path.dirname(resume_path))
 
-    if args_cli.video:
-        video_kwargs = {
-            "video_folder": os.path.join(log_dir, "videos", "play"),
-            "step_trigger": lambda step: step == 0,
-            "video_length": args_cli.video_length,
-            "disable_logger": True,
-        }
-        print("[INFO] Recording videos during training.")
-        print_dict(video_kwargs, nesting=4)
-        env = gym.wrappers.RecordVideo(env, **video_kwargs)
     
     # Logging rewards
-    run_num = "2"
+    run_num = "10"
     model_path = os.path.abspath(args_cli.checkpoint)
     log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
@@ -226,7 +228,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
-    run_num = "2"
+    run_num = "15"
     timestep = 0
     obs, _ = env.reset()
     # simulate environment
