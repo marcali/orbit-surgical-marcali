@@ -159,7 +159,7 @@ def main():
 
     
     # Logging rewards
-    run_num = "10"
+    run_num = "1"
     model_path = os.path.abspath(args_cli.checkpoint)
     log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
@@ -172,7 +172,7 @@ def main():
                 writer.writerow(["Run","Step", "Reward", "Dones"])
     
 
-    def log_reward(step, reward, term, time_out, extra, path, run_num):
+    def log_reward(step, reward, term, time_out, extra, path, run_num, epoch):
         # Convert tensors to scalars or lists
         def convert_value(value):
             if isinstance(value, torch.Tensor):
@@ -194,6 +194,7 @@ def main():
         log_data = {
             'Run': run_num,
             'Step': step,
+            'Epoch': epoch,
             'Reward': convert_value(reward),
             'Dones': convert_value(term)
         }
@@ -230,6 +231,7 @@ def main():
     # reset environment
     run_num = "15"
     timestep = 0
+    epoch = 1
     obs, _ = env.reset()
     # simulate environment
     while simulation_app.is_running():
@@ -239,8 +241,12 @@ def main():
             actions = agent.act(obs, timestep=0, timesteps=0)[0]
             # env stepping
             timestep += 1
+            if timestep % 16 == 0:
+                epoch += 1
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num)
+            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num, epoch)
+            if epoch == 40:
+                break
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

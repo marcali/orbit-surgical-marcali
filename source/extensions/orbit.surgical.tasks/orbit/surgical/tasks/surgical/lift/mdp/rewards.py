@@ -217,10 +217,10 @@ class object_Collision(ManagerTermBase):
     
     def __call__(self, env: ManagerBasedRLEnv):
 
-        collision = self.collision_penalty(env)
+        #collision = self.collision_penalty(env)
         proximity_penalty = self.dynamic_penalty(env)
-        return collision + proximity_penalty
-
+        return proximity_penalty
+    
     def collision_penalty(
         self,
         env: ManagerBasedRLEnv
@@ -231,8 +231,8 @@ class object_Collision(ManagerTermBase):
         moved = torch.where(
             torch.norm(obst_delta, dim=-1, p=2) + torch.norm(obst_vel, dim=-1, p=2)
             > 0.005,
-            torch.tensor(1.0, device=env.device),
-            torch.tensor(0.0, device=env.device),
+            1.0,
+            0.0,
         )
 
         return moved
@@ -241,21 +241,29 @@ class object_Collision(ManagerTermBase):
         self,
         env: ManagerBasedRLEnv,
     ) -> torch.Tensor:
-        """Compute the penalty for approaching the obstacle."""
+        """Compute the penalty for approaching the obstacle with a smooth gradient."""
 
-        # Positions
-        obstacle_pos_w = self.obstacle.data.root_pos_w
-        ee_w = self.ee.data.target_pos_w[..., 0, :]
+        obstacle_pos_w = self.obstacle.data.root_pos_w  # Shape: (num_envs, 3)
+        ee_w = self.ee.data.target_pos_w[..., 0, :]  # Shape: (num_envs, 3)
 
-        # Distance
-        obstacle_ee_distance = torch.norm(obstacle_pos_w - ee_w, dim=1)
+        # Compute Euclidean distance between end-effector and obstacle
+        obstacle_ee_distance = torch.norm(obstacle_pos_w - ee_w, dim=1)  # Shape: (num_envs,)
 
-        # Threshold for penalty
-        obstacle_threshold = 0.1
+        #print("obstacle_ee_distance:", obstacle_ee_distance)
+
+        # Define threshold for penalty
+        obstacle_threshold = 0.2  
+
+        # Compute smooth penalty using tanh
+        penalty_values = 1 - torch.tanh(obstacle_ee_distance / obstacle_threshold)  # Shape: (num_envs,)
+        #print("penalty_values (1 - tanh(distance / threshold)):", penalty_values)
+
+        # Apply penalty: higher penalty as distance decreases below the threshold
         penalty = torch.where(
             obstacle_ee_distance < obstacle_threshold,
-            1 - (obstacle_ee_distance / obstacle_threshold),
-            torch.tensor(0.0, device=env.device),
+            penalty_values,  # Smooth penalty value
+            0.0              # Scalar value; broadcasted to match shape
         )
+        #print("penalty:", penalty)
 
         return penalty
