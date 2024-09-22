@@ -43,7 +43,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
         # obstacle: will be populated by agent env cfg
-    #obstacle: RigidObjectCfg = MISSING
+    obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -116,7 +116,7 @@ class ObservationsCfg:
         #object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
 
         # obstacle position and velocity
-        #obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
+        obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
         #obstacle_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("obstacle")})
 
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
@@ -212,15 +212,15 @@ class EventCfg:
         },
     )
 
-    # reset_obstacle_position = EventTerm(
-    #     func=mdp.reset_root_state_uniform,
-    #     mode="reset",
-    #     params={
-    #         "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
-    #         "velocity_range": {},
-    #         "asset_cfg": SceneEntityCfg("obstacle", body_names="Obstacle"),
-    #     },
-    # )
+    reset_obstacle_position = EventTerm(
+        func=mdp.reset_root_state_uniform,
+        mode="reset",
+        params={
+            "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("obstacle", body_names="Obstacle"),
+        },
+    )
 
 
 @configclass
@@ -274,7 +274,7 @@ class RewardsCfg:
     #best weight -0.01
     applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
-    #collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.5)
+    collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-3.0)
     
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -322,12 +322,12 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
     )
 
-    #collision1 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -8.0, "num_steps": 15000})
+    collision1 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -8.0, "num_steps": 15000})
 
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
     # )
-    #collision2 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -10.0, "num_steps": 000})
+    collision2 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -10.0, "num_steps": 20000})
 
 
     #best weight -1.0
@@ -336,11 +336,11 @@ class CurriculumCfg:
     )
 
     #best weight -0.1
-    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -0.1, "num_steps": 15000})
+    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -1.0, "num_steps": 15000})
     #does nothing for rsl rl and kind of impreves for slrl
-    # object_moving = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -3, "num_steps": 20000}
-    # )
+    object_moving = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 15000}
+    )
 
 
 ##

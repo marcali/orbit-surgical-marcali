@@ -252,7 +252,7 @@ class object_Collision(ManagerTermBase):
         #print("obstacle_ee_distance:", obstacle_ee_distance)
 
         # Define threshold for penalty
-        obstacle_threshold = 0.2  
+        obstacle_threshold = 0.1
 
         # Compute smooth penalty using tanh
         penalty_values = 1 - torch.tanh(obstacle_ee_distance / obstacle_threshold)  # Shape: (num_envs,)

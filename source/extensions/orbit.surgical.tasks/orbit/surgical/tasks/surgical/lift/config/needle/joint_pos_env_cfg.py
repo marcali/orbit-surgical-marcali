@@ -101,7 +101,7 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
         #         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0), metallic=0.2),
         #         #activate_contact_sensors=True,
         #     ),
-        #)
+        # )
 
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
@@ -132,6 +132,6 @@ class NeedleLiftEnvCfg_PLAY(NeedleLiftEnvCfg):
         super().__post_init__()
         # make a smaller scene for play
         self.scene.num_envs = 50
-        self.scene.env_spacing = 2.5
+        self.scene.env_spacing = 2.0
         # disable randomization for play
         self.observations.policy.enable_corruption = False
