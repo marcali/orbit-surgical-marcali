@@ -159,7 +159,6 @@ def main():
 
     
     # Logging rewards
-    run_num = "1"
     model_path = os.path.abspath(args_cli.checkpoint)
     log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
     log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
@@ -172,7 +171,7 @@ def main():
                 writer.writerow(["Run","Step", "Reward", "Dones"])
     
 
-    def log_reward(step, reward, term, time_out, extra, path, run_num, epoch):
+    def log_reward(step, reward, extra, path, run_num, epoch, episode):
         # Convert tensors to scalars or lists
         def convert_value(value):
             if isinstance(value, torch.Tensor):
@@ -195,8 +194,8 @@ def main():
             'Run': run_num,
             'Step': step,
             'Epoch': epoch,
-            'Reward': convert_value(reward),
-            'Dones': convert_value(term)
+            'Episode': episode,
+            'Reward': convert_value(reward)
         }
 
         if extra:
@@ -220,7 +219,7 @@ def main():
         df_combined.to_csv(path, index=False)
 
     
-    initialize_csv(log_performance_path)
+    #initialize_csv(log_performance_path)
 
     # initialize agent
     agent.init()
@@ -229,8 +228,9 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
-    run_num = "15"
+    run_num = "10"
     timestep = 0
+    episode = 1
     epoch = 1
     obs, _ = env.reset()
     # simulate environment
@@ -241,12 +241,14 @@ def main():
             actions = agent.act(obs, timestep=0, timesteps=0)[0]
             # env stepping
             timestep += 1
-            if timestep % 16 == 0:
+            if timestep % 32 == 0:
                 epoch += 1
-            obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num, epoch)
-            if epoch == 40:
+            if timestep % 100 == 0:
+                episode += 1
+            if episode == 11:
                 break
+            obs, rew, term, time_out, extra = env.step(actions)
+            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

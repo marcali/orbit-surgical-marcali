@@ -249,14 +249,14 @@ class object_Collision(ManagerTermBase):
         # Compute Euclidean distance between end-effector and obstacle
         obstacle_ee_distance = torch.norm(obstacle_pos_w - ee_w, dim=1)  # Shape: (num_envs,)
 
-        #print("obstacle_ee_distance:", obstacle_ee_distance)
+        print("obstacle_ee_distance:", obstacle_ee_distance)
 
         # Define threshold for penalty
-        obstacle_threshold = 0.2  
+        obstacle_threshold = 0.1
 
         # Compute smooth penalty using tanh
         penalty_values = 1 - torch.tanh(obstacle_ee_distance / obstacle_threshold)  # Shape: (num_envs,)
-        #print("penalty_values (1 - tanh(distance / threshold)):", penalty_values)
+        print("penalty_values (1 - tanh(distance / threshold)):", penalty_values)
 
         # Apply penalty: higher penalty as distance decreases below the threshold
         penalty = torch.where(
@@ -264,6 +264,6 @@ class object_Collision(ManagerTermBase):
             penalty_values,  # Smooth penalty value
             0.0              # Scalar value; broadcasted to match shape
         )
-        #print("penalty:", penalty)
+        print("penalty:", penalty)
 
         return penalty
