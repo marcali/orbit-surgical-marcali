@@ -171,7 +171,7 @@ def main():
                 writer.writerow(["Run","Step", "Reward", "Dones"])
     
 
-    def log_reward(step, reward, term, time_out, extra, path, run_num, epoch, episode):
+    def log_reward(step, reward, extra, path, run_num, epoch, episode):
         # Convert tensors to scalars or lists
         def convert_value(value):
             if isinstance(value, torch.Tensor):
@@ -228,7 +228,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
-    run_num = "1"
+    run_num = "10"
     timestep = 0
     episode = 1
     epoch = 1
@@ -248,9 +248,7 @@ def main():
             if episode == 11:
                 break
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num, epoch, episode)
-            if episode == 10:
-                break
+            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

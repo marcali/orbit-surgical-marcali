@@ -6,10 +6,10 @@
 from orbit.surgical.assets import ORBITSURGICAL_ASSETS_DATA_DIR
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import RigidObjectCfg
+from omni.isaac.lab.assets import RigidObjectCfg, DeformableObjectCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
-from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
+from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg, DeformableBodyPropertiesCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from omni.isaac.lab.utils import configclass
 
@@ -63,7 +63,7 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "psm_tool_tip_link"
 
-        # Set Suture Needle as object
+        # # Set Suture Needle as object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(1, 0, 0, 0)),
@@ -81,27 +81,42 @@ class NeedleLiftEnvCfg(LiftEnvCfg):
             ),
         )
 
-                # Rigid Object cone obstacle
-        # self.scene.obstacle = RigidObjectCfg(
-        #     prim_path="{ENV_REGEX_NS}/Obstacle",
-        #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.05, 0.0, 0.015), rot=(1, 0, 0, 0)),
-        #     # contact_pose=torch.tensor([-1.0, 0.0, 0.0, 1, 0, 0, 0]),
-        #     # non_contact_pose=torch.tensor([-1.0, 0.0, 1.0, 1, 0, 0, 0]),
-        #     spawn=sim_utils.ConeCfg(
-        #         radius=0.05,
-        #         height=0.1,
-        #         rigid_props=sim_utils.RigidBodyPropertiesCfg(
-        #             disable_gravity=False,
+        # self.scene.object = DeformableObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/Object",
+        #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(1, 0, 0, 0)),
+        #     spawn=UsdFileCfg(
+        #         usd_path=f"{ORBITSURGICAL_ASSETS_DATA_DIR}/Props/tube/tube_02.usd",
+        #         scale=(0.2, 0.2, 0.2),
+        #         rigid_props=DeformableBodyPropertiesCfg(
+        #             solver_position_iteration_count=16,
+        #             max_depenetration_velocity=1.0,
+        #             contact_offset=0.001,
+        #             rest_offset=0.0,
         #         ),
-        #         mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
-        #         collision_props=sim_utils.CollisionPropertiesCfg(
-        #             collision_enabled=True,
-        #             #contact_offset=0.05,
-        #         ),
-        #         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0), metallic=0.2),
-        #         #activate_contact_sensors=True,
-        #     ),
+        #     )
         # )
+
+                # Rigid Object cone obstacle
+        self.scene.obstacle = RigidObjectCfg(
+            prim_path="{ENV_REGEX_NS}/Obstacle",
+            init_state=RigidObjectCfg.InitialStateCfg(pos=(0.05, 0.0, 0.015), rot=(1, 0, 0, 0)),
+            # contact_pose=torch.tensor([-1.0, 0.0, 0.0, 1, 0, 0, 0]),
+            # non_contact_pose=torch.tensor([-1.0, 0.0, 1.0, 1, 0, 0, 0]),
+            spawn=sim_utils.ConeCfg(
+                radius=0.05,
+                height=0.1,
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    disable_gravity=False,
+                ),
+                mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
+                collision_props=sim_utils.CollisionPropertiesCfg(
+                    collision_enabled=True,
+                    #contact_offset=0.05,
+                ),
+                visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0), metallic=0.2),
+                #activate_contact_sensors=True,
+            ),
+        )
 
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
