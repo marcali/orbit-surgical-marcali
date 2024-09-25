@@ -248,7 +248,7 @@ def main():
             if episode == 11:
                 break
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
+            #log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

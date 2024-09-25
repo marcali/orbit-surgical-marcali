@@ -6,11 +6,11 @@ models:
   #separate: False
   separate: True
   policy:  # see skrl.utils.model_instantiators.torch.gaussian_model for parameter details
-    # clip_actions: False
-    # clip_log_std: True
-    # initial_log_std: 0
-    # min_log_std: -20.0
-    # max_log_std: 2.0
+    clip_actions: False
+    clip_log_std: True
+    initial_log_std: 0
+    min_log_std: -20.0
+    max_log_std: 2.0
     input_shape: "Shape.STATES"
     hiddens: [256, 128, 64]
     hidden_activation: ["elu", "elu", "elu"]
@@ -35,9 +35,6 @@ agent:
   rollouts: 16
   learning_epochs: 8
   mini_batches: 8
-  # rollouts: 16
-  # learning_epochs: 8
-  # mini_batches: 8
   discount_factor: 0.99
   lambda: 0.95 #gae lambda
   learning_rate: 3.e-4
@@ -59,7 +56,6 @@ agent:
   value_loss_scale: 2.0
   kl_threshold: 0
   rewards_shaper_scale: 0.01
-  #rewards_shaper_scale: 0.1
   # logging and checkpoint
 
   experiment:

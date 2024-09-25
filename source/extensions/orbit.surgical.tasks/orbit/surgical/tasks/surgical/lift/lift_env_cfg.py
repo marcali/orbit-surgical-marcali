@@ -8,7 +8,7 @@ from dataclasses import MISSING
 from orbit.surgical.assets import ORBITSURGICAL_ASSETS_DATA_DIR
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
+from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg, DeformableObjectCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
@@ -43,7 +43,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
         # obstacle: will be populated by agent env cfg
-    obstacle: RigidObjectCfg = MISSING
+    #obstacle: RigidObjectCfg = MISSING
 
     # Table
     table = AssetBaseCfg(
@@ -116,7 +116,7 @@ class ObservationsCfg:
         #object_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("object")})
 
         # obstacle position and velocity
-        obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
+        #obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
         #obstacle_velocity = ObsTerm(func=mdp.root_lin_vel_w, params={"asset_cfg": SceneEntityCfg("obstacle")})
 
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
@@ -212,15 +212,15 @@ class EventCfg:
         },
     )
 
-    reset_obstacle_position = EventTerm(
-        func=mdp.reset_root_state_uniform,
-        mode="reset",
-        params={
-            "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
-            "velocity_range": {},
-            "asset_cfg": SceneEntityCfg("obstacle", body_names="Obstacle"),
-        },
-    )
+    # reset_obstacle_position = EventTerm(
+    #     func=mdp.reset_root_state_uniform,
+    #     mode="reset",
+    #     params={
+    #         "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
+    #         "velocity_range": {},
+    #         "asset_cfg": SceneEntityCfg("obstacle", body_names="Obstacle"),
+    #     },
+    # )
 
 
 @configclass
@@ -232,19 +232,19 @@ class RewardsCfg:
 
     # increased lifing reward
     # best result: no reach, lift weight 15, dt 0.01, 5.sec
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.03}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
 
     # sd 0.3, best weight 16.0
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.03, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
         weight=16.0,
     )
 
     # sd 0.05, best weight 5.0
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.03, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
         weight=5.0,
     )
 
@@ -252,7 +252,7 @@ class RewardsCfg:
     #best weight -1e-3
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
     # penalized agent for taking large actions. encourages to take small controlled actions
-    action_l2 = RewTerm(func=mdp.action_l2, weight=-0.0001)
+    #action_l2 = RewTerm(func=mdp.action_l2, weight=-0.0001)
 
     #best weight -1e-2
     joint_vel = RewTerm(
@@ -265,16 +265,16 @@ class RewardsCfg:
     object_drop = RewTerm(func=mdp.object_velocity, weight=-2.0)
 
     #best weight -0.01
-    joint_deviation = RewTerm(
-        func=mdp.joint_deviation_l1,
-        weight=-0.08,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
-    )
+    # joint_deviation = RewTerm(
+    #     func=mdp.joint_deviation_l1,
+    #     weight=-0.01,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["psm_tool_pitch_joint", "psm_tool_roll_joint"])},
+    # )
     
     #best weight -0.01
     applied_torque_limits = RewTerm(func=mdp.applied_torque_limits, weight=-0.01, params={"asset_cfg": SceneEntityCfg("robot")})
 
-    collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-3.0)
+    #collision = RewTerm(func=mdp.rewards.object_Collision, params={}, weight=-0.5)
     
     # grasp_needle = RewTerm(
     #     func=mdp.grasp_needle,
@@ -322,12 +322,12 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1.0, "num_steps": 15000}
     )
 
-    collision1 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -7.0, "num_steps": 15000})
+    #collision1 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -8.0, "num_steps": 15000})
 
     # grasp_needle = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "grasp_needle", "weight": 17, "num_steps": 25000}
     # )
-    #collision2 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -8.0, "num_steps": 20000})
+    #collision2 = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -10.0, "num_steps": 000})
 
 
     #best weight -1.0
@@ -336,10 +336,10 @@ class CurriculumCfg:
     )
 
     #best weight -0.1
-    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -1.0, "num_steps": 15000})
+    torque_limits = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "applied_torque_limits", "weight": -0.1, "num_steps": 15000})
     #does nothing for rsl rl and kind of impreves for slrl
     # object_moving = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -5, "num_steps": 15000}
+    #     func=mdp.modify_reward_weight, params={"term_name": "object_drop", "weight": -3, "num_steps": 20000}
     # )
 
 
@@ -369,9 +369,8 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         # general settings
         self.decimation = 4
         self.sim.render_interval = self.decimation
-        self.episode_length_s = 2.5
+        self.episode_length_s = 2.0
         # simulation settings
         self.sim.dt = 1.0 / 200.0
-        #self.sim.dt = 0.01
         self.viewer.eye = (0.2, 0.2, 0.1)
         self.viewer.lookat = (0.0, 0.0, 0.04)

@@ -1,0 +1,68 @@
+seed: 42
+models:
+  separate: true
+  policy:
+    clip_actions: false
+    clip_log_std: true
+    min_log_std: -20.0
+    max_log_std: 2.0
+    input_shape: Shape.STATES
+    hiddens:
+    - 512
+    - 256
+    - 128
+    - 64
+    hidden_activation:
+    - elu
+    - elu
+    - elu
+    - elu
+    output_shape: Shape.ACTIONS
+    output_activation: ''
+    output_scale: 1.0
+  value:
+    clip_actions: false
+    input_shape: Shape.STATES
+    hiddens:
+    - 256
+    - 128
+    - 64
+    hidden_activation:
+    - elu
+    - elu
+    - elu
+    output_shape: Shape.ONE
+    output_activation: ''
+    output_scale: 1.0
+agent:
+  rollouts: 24
+  learning_epochs: 8
+  mini_batches: 4
+  discount_factor: 0.99
+  lambda: 0.95
+  learning_rate: 0.0001
+  learning_rate_scheduler: KLAdaptiveLR
+  learning_rate_scheduler_kwargs:
+    kl_threshold: 0.01
+  state_preprocessor: RunningStandardScaler
+  state_preprocessor_kwargs: null
+  value_preprocessor: RunningStandardScaler
+  value_preprocessor_kwargs: null
+  random_timesteps: 0
+  learning_starts: 0
+  grad_norm_clip: 1.0
+  ratio_clip: 0.2
+  value_clip: 0.2
+  clip_predicted_values: true
+  entropy_loss_scale: 0.0
+  value_loss_scale: 0.5
+  rewards_shaper_scale: 0.01
+  kl_threshold: 0.0
+  experiment:
+    directory: /home/ubuntu/orbit-surgical-marcali/logs/skrl/lift
+    experiment_name: 2024-09-25_12-50-39
+    write_interval: 120
+    checkpoint_interval: 1200
+trainer:
+  timesteps: 30000
+  environment_info: log
