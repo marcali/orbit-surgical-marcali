@@ -109,14 +109,21 @@ class RewardsCfg:
         weight=-0.2,
         params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
     )
+
+    end_effector_position_tracking_fine_grained = RewTerm(
+        func=mdp.position_command_error_tanh,
+        weight=0.1,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "std": 0.1, "command_name": "ee_pose"},
+    )
+
     end_effector_orientation_tracking = RewTerm(
         func=mdp.orientation_command_error,
-        weight=-0.05,
+        weight=-0.25,
         params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
     )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-0.0001,

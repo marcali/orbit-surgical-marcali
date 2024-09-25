@@ -51,6 +51,8 @@ class PSMReachEnvCfg(ReachEnvCfg):
         # override rewards
         self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["psm_tool_tip_link"]
         self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["psm_tool_tip_link"]
+        self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["psm_tool_tip_link"]
+
         # override actions
         self.actions.arm_action = mdp.JointPositionActionCfg(
             asset_name="robot",
@@ -73,9 +75,9 @@ class PSMReachEnvCfg(ReachEnvCfg):
             resampling_time_range=(4.0, 4.0),
             debug_vis=True,
             ranges=mdp.UniformPoseCommandCfg.Ranges(
-                pos_x=(-0.07, 0.07),
-                pos_y=(-0.07, 0.07),
-                pos_z=(-0.12, -0.08),
+                pos_x=(-0.05, 0.05),
+                pos_y=(-0.05, 0.05),
+                pos_z=(-0.12, -0.12),
                 roll=(0.0, 0.0),
                 pitch=(0.0, 0.0),
                 yaw=(0.0, 0.0),

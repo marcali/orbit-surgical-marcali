@@ -24,7 +24,7 @@ parser.add_argument(
 )
 
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
-parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
+parser.add_argument("--video_length", type=int, default=500, help="Length of the recorded video (in steps).")
 parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument("--checkpoint", type=str, default=None, help="Path to model checkpoint.")
@@ -248,7 +248,7 @@ def main():
             if episode == 11:
                 break
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
+            #log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

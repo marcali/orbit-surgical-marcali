@@ -137,18 +137,11 @@ def align_ee_handle(
     # get current x and z direction of the gripper
     ee_tcp_x, ee_tcp_z = ee_tcp_rot_mat[..., 0], ee_tcp_rot_mat[..., 2]
 
-    # make sure gripper aligns with the handle
-    # in this case, the z direction of the gripper should be close to the -x direction of the handle
-    # and the x direction of the gripper should be close to the -y direction of the handle
-    # dot product of z and x should be large
+
     align_z = torch.bmm(ee_tcp_z.unsqueeze(1), -handle_x).squeeze(-1).squeeze(-1)
     align_x = torch.bmm(ee_tcp_x.unsqueeze(1), -handle_y).squeeze(-1).squeeze(-1)
     reward = 0.5 * (torch.sign(align_z) * align_z**2 + torch.sign(align_x) * align_x**2)
-    # multiplied by weight for logging
-    # modified_reward = reward * 1
-    # log_to_csv(os.path.join(log_root_path, "alignment_reward.csv"), modified_reward.tolist())
     return reward
-    # return torch.where(object.data.root_pos_w[:, 2] > 0.02, 1.0, 0.0)
 
 
 def grasp_needle(
