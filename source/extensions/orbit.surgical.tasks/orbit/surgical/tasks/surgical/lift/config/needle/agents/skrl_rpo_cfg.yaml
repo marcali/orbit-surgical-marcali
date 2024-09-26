@@ -58,7 +58,7 @@ agent:
   kl_threshold: 0.0
 
   # RPO-specific settings
-  alpha: 0.5
+  alpha: 0.9
 
   # Logging and checkpoint
   experiment:
