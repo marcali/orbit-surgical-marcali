@@ -11,8 +11,8 @@ models:
     min_log_std: -20.0
     max_log_std: 2.0
     input_shape: "Shape.STATES"
-    hiddens: [256, 128, 64]
-    hidden_activation: ["relu", "relu", "relu"]
+    hiddens: [512, 256, 128, 64]
+    hidden_activation: ["elu","elu", "elu", "elu"]
     output_shape: "Shape.ACTIONS"
     output_activation: ""
     output_scale: 1.0
@@ -20,8 +20,8 @@ models:
   critic_1:
     clip_actions: False
     input_shape: "Shape.STATES_ACTIONS"
-    hiddens: [512, 256]
-    hidden_activation: ["relu", "relu"]
+    hiddens: [256, 128]
+    hidden_activation: ["elu", "elu"]
     output_shape: "Shape.ONE"  # Enclose 1 in quotes
     output_activation: ""
     output_scale: 1.0
@@ -30,8 +30,8 @@ models:
     # Same as critic_1
     clip_actions: False
     input_shape: "Shape.STATES_ACTIONS"
-    hiddens: [512, 256]
-    hidden_activation: ["relu", "relu"]
+    hiddens: [256, 128]
+    hidden_activation: ["elu", "elu"]
     output_shape: "Shape.ONE"  # Enclose 1 in quotes
     output_activation: ""
     output_scale: 1.0
@@ -40,8 +40,8 @@ models:
     # Same as critic_1
     clip_actions: False
     input_shape: "Shape.STATES_ACTIONS"
-    hiddens: [512, 256]
-    hidden_activation: ["relu", "relu"]
+    hiddens: [256, 128]
+    hidden_activation: ["elu", "elu"]
     output_shape: "Shape.ONE"  # Enclose 1 in quotes
     output_activation: ""
     output_scale: 1.0
@@ -50,15 +50,15 @@ models:
     # Same as critic_1
     clip_actions: False
     input_shape: "Shape.STATES_ACTIONS"
-    hiddens: [512, 256]
-    hidden_activation: ["relu", "relu"]
+    hiddens: [256, 128]
+    hidden_activation: ["elu", "elu"]
     output_shape: "Shape.ONE"  # Enclose 1 in quotes
     output_activation: ""
     output_scale: 1.0
   
 agent:
   gradient_steps: 1
-  batch_size: 256
+  batch_size: 64
   discount_factor: 0.98
   polyak: 0.01   # For target networks in SAC (also known as tau)
   actor_learning_rate: 1.e-4
@@ -75,7 +75,7 @@ agent:
   learn_entropy: True
   entropy_learning_rate: 1.e-4
   initial_entropy_value: 0.2
-  rewards_shaper_scale: 1.0
+  rewards_shaper_scale: 0.01
   # logging and checkpoint
   experiment:
     directory: "sac_lift"

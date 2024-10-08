@@ -144,8 +144,8 @@ def main():
 
     agent_cfg["state_preprocessor_kwargs"].update({"size": env.observation_space, "device": env.device})
     agent_cfg["value_preprocessor_kwargs"].update({"size": 1, "device": env.device})
-    agent_cfg["experiment"]["write_interval"] = 0  # don't log to Tensorboard
-    agent_cfg["experiment"]["checkpoint_interval"] = 0  # don't generate checkpoints
+    agent_cfg["experiment"]["write_interval"] = 1  # don't log to Tensorboard
+    agent_cfg["experiment"]["checkpoint_interval"] = 1  # don't generate checkpoints
 
     agent = PPO(
         models=models,
@@ -219,7 +219,7 @@ def main():
         df_combined.to_csv(path, index=False)
 
     
-    #initialize_csv(log_performance_path)
+    initialize_csv(log_performance_path)
 
     # initialize agent
     agent.init()
@@ -228,7 +228,7 @@ def main():
     agent.set_running_mode("eval")
 
     # reset environment
-    run_num = "10"
+    run_num = "1"
     timestep = 0
     episode = 1
     epoch = 1
@@ -248,7 +248,7 @@ def main():
             if episode == 11:
                 break
             obs, rew, term, time_out, extra = env.step(actions)
-            #log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
+            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:

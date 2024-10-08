@@ -1,4 +1,4 @@
-seed: 42
+seed: 40
 
 # Models are instantiated using skrl's model instantiator utility
 # https://skrl.readthedocs.io/en/latest/api/utils/model_instantiators.html
@@ -6,10 +6,10 @@ models:
   #separate: False
   separate: True
   policy:  # see skrl.utils.model_instantiators.torch.gaussian_model for parameter details
-    clip_actions: False
-    clip_log_std: True
-    min_log_std: -20.0
-    max_log_std: 2.0
+    # clip_actions: False
+    # clip_log_std: True
+    # min_log_std: -20.0
+    # max_log_std: 2.0
     input_shape: "Shape.STATES"
     hiddens: [512, 256, 128, 64]
     hidden_activation: ["elu", "elu", "elu", "elu"]

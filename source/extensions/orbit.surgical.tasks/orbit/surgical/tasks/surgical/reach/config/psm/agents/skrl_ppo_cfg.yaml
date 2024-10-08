@@ -9,7 +9,7 @@ models:
     clip_log_std: True
     min_log_std: -20.0
     max_log_std: 2.0
-    #initial_log_std: 0.0
+    initial_log_std: 0.0
     input_shape: "Shape.STATES"
     #best 128 128 128
     hiddens: [128, 128, 128]
@@ -60,7 +60,7 @@ agent:
   rewards_shaper_scale: 0.1
   # logging and checkpoint
   experiment:
-    directory: "reach"
+    directory: "reach_obs"
     experiment_name: ""
     write_interval: 120
     checkpoint_interval: 1200

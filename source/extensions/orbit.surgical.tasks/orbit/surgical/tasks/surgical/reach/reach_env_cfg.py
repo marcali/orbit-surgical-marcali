@@ -6,7 +6,7 @@
 from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
+from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import ActionTermCfg as ActionTerm
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
@@ -42,6 +42,8 @@ class ReachSceneCfg(InteractiveSceneCfg):
 
     # robots
     robot: ArticulationCfg = MISSING
+
+    obstacle: RigidObjectCfg = MISSING
 
     # lights
     light = AssetBaseCfg(
@@ -81,6 +83,8 @@ class ObservationsCfg:
         # observation terms (order preserved)
         joint_pos = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
+        obstacle_position = ObsTerm(func=mdp.obstacle_position_in_robot_root_frame)
+
         pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
@@ -97,6 +101,16 @@ class EventCfg:
     """Configuration for events."""
 
     reset_robot_joints: EventTerm = MISSING
+
+    reset_obstacle_position = EventTerm(
+        func=mdp.reset_root_state_uniform,
+        mode="reset",
+        params={
+            "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "z": (0.0, 0.0)},
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("obstacle", body_names="Obstacle"),
+        },
+    )
 
 
 @configclass
@@ -130,6 +144,8 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
+    collision = RewTerm(func=mdp.rewards.ObstacleAvoidancePenalty, params={}, weight=-0.1)
+
 
 @configclass
 class TerminationsCfg:
@@ -145,6 +161,8 @@ class CurriculumCfg:
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -0.005, "num_steps": 4500}
     )
+
+    collision = CurrTerm(func=mdp.modify_reward_weight, params={"term_name": "collision", "weight": -0.2, "num_steps": 10500})
 
 
 ##

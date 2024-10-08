@@ -1,4 +1,4 @@
-seed: 42
+seed: 41
 
 # Models are instantiated using skrl's model instantiator utility
 # https://skrl.readthedocs.io/en/latest/api/utils/model_instantiators.html
@@ -61,10 +61,10 @@ agent:
 
   experiment:
     # directory: "lift"
-    directory: "lift"
+    directory: "lift_play"
     experiment_name: ""
-    write_interval: 120
-    checkpoint_interval: 1200
+    write_interval: 1
+    checkpoint_interval: 1
 
 
 # Sequential trainer

@@ -43,6 +43,7 @@ def object_is_lifted(
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
     reward = torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+    print("reward:", reward)
     return reward
 
 

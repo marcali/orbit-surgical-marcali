@@ -8,6 +8,7 @@ from __future__ import annotations
 from orbit.surgical.assets import ORBITSURGICAL_ASSETS_DATA_DIR
 
 import omni.isaac.lab.sim as sim_utils
+from omni.isaac.lab.assets import RigidObjectCfg, DeformableObjectCfg
 from omni.isaac.lab.assets import AssetBaseCfg
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
 from omni.isaac.lab.sensors import FrameTransformerCfg
@@ -77,10 +78,32 @@ class PSMReachEnvCfg(ReachEnvCfg):
             ranges=mdp.UniformPoseCommandCfg.Ranges(
                 pos_x=(-0.05, 0.05),
                 pos_y=(-0.05, 0.05),
-                pos_z=(-0.12, -0.12),
+                pos_z=(-0.12, 0.12),
                 roll=(0.0, 0.0),
                 pitch=(0.0, 0.0),
                 yaw=(0.0, 0.0),
+            ),
+        )
+
+                        # Rigid Object cone obstacle
+        self.scene.obstacle = RigidObjectCfg(
+            prim_path="{ENV_REGEX_NS}/Obstacle",
+            init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(1, 0, 0, 0)),
+            # contact_pose=torch.tensor([-1.0, 0.0, 0.0, 1, 0, 0, 0]),
+            # non_contact_pose=torch.tensor([-1.0, 0.0, 1.0, 1, 0, 0, 0]),
+            spawn=sim_utils.ConeCfg(
+                radius=0.05,
+                height=0.1,
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    disable_gravity=False,
+                ),
+                mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
+                collision_props=sim_utils.CollisionPropertiesCfg(
+                    collision_enabled=True,
+                    #contact_offset=0.05,
+                ),
+                visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0), metallic=0.2),
+                #activate_contact_sensors=True,
             ),
         )
 

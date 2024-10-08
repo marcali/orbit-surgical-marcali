@@ -1,4 +1,4 @@
-seed: 43
+seed: 42
 
 # Models are instantiated using skrl's model instantiator utility
 # https://skrl.readthedocs.io/en/latest/api/utils/model_instantiators.html
@@ -6,11 +6,10 @@ models:
   #separate: False
   separate: True
   policy:  # see skrl.utils.model_instantiators.torch.gaussian_model for parameter details
-    clip_actions: False
-    clip_log_std: True
-    initial_log_std: 0
-    min_log_std: -20.0
-    max_log_std: 2.0
+    # clip_actions: False
+    # clip_log_std: True
+    # min_log_std: -20.0
+    # max_log_std: 2.0
     input_shape: "Shape.STATES"
     hiddens: [256, 128, 64]
     hidden_activation: ["elu", "elu", "elu"]
@@ -60,7 +59,7 @@ agent:
 
   experiment:
     # directory: "lift"
-    directory: "lift"
+    directory: "lift_og"
     experiment_name: ""
     write_interval: 120
     checkpoint_interval: 1200
@@ -69,5 +68,5 @@ agent:
 # Sequential trainer
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
-  timesteps: 24000
+  timesteps: 30000
   environment_info: "log"

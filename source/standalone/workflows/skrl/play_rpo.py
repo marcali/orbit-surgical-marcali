@@ -131,14 +131,11 @@ def main():
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
 
-    # Logging rewards
-    run_num = "1"
-    model_path = os.path.abspath(args_cli.checkpoint) if args_cli.checkpoint else ""
-    log_performance_dir = os.path.join(log_root_path, "inference_logs")
-    os.makedirs(log_performance_dir, exist_ok=True)
-    log_performance_filename = f"performance_log_run_{run_num}.csv"
-    log_performance_path = os.path.join(log_performance_dir, log_performance_filename)
-    print(f"[INFO] Logging RESULTS in directory: {log_performance_path}")
+     # Logging rewards
+    model_path = os.path.abspath(args_cli.checkpoint)
+    log_performance_dir = os.path.dirname(os.path.join(log_root_path, model_path))
+    log_performance_path = os.path.join(log_performance_dir, "performance_log.csv")
+    print(f"[INFO] Logging RESULTS in directory: {log_root_path}")
 
     def initialize_csv(path):
         if not os.path.exists(path):
@@ -147,7 +144,7 @@ def main():
                 writer.writerow(["Run","Step", "Reward", "Dones"])
     
 
-    def log_reward(step, reward, term, time_out, extra, path, run_num):
+    def log_reward(step, reward, extra, path, run_num, epoch, episode):
         # Convert tensors to scalars or lists
         def convert_value(value):
             if isinstance(value, torch.Tensor):
@@ -169,8 +166,9 @@ def main():
         log_data = {
             'Run': run_num,
             'Step': step,
-            'Reward': convert_value(reward),
-            'Dones': convert_value(term)
+            'Epoch': epoch,
+            'Episode': episode,
+            'Reward': convert_value(reward)
         }
 
         if extra:
@@ -203,6 +201,7 @@ def main():
         resume_path = get_checkpoint_path(log_root_path, other_dirs=["checkpoints"])
     print(f"[INFO] Loading model checkpoint from: {resume_path}")
 
+    initialize_csv(log_performance_path)
     # Initialize agent
     agent.init()
     agent.load(resume_path)
@@ -210,20 +209,28 @@ def main():
     agent.set_running_mode("eval")
 
     # Reset environment
-    run_num = "1"
+    #5 not good
+    run_num = "10"
     timestep = 0
+    episode = 1
+    epoch = 1
     obs, _ = env.reset()
     # Simulate environment
     while simulation_app.is_running():
-        # Run everything in inference mode
+        # run everything in inference mode
         with torch.inference_mode():
-            # Agent stepping
+            # agent stepping
             actions = agent.act(obs, timestep=0, timesteps=0)[0]
-
-            # Env stepping
+            # env stepping
             timestep += 1
+            if timestep % 32 == 0:
+                epoch += 1
+            if timestep % 100 == 0:
+                episode += 1
+            if episode == 11:
+                break
             obs, rew, term, time_out, extra = env.step(actions)
-            log_reward(timestep, rew, term, time_out, extra, log_performance_path, run_num)
+            log_reward(timestep, rew, extra, log_performance_path, run_num, epoch, episode)
             if args_cli.video:
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:
